@@ -575,14 +575,15 @@
     <span id="toastMsg">Notifikasi</span>
   </div>
 
-  <!-- JAVASCRIPT LOGIC (PERBAIKAN FULL MENGGUNAKAN FETCH API) -->
+  <!-- JAVASCRIPT LOGIC (PERBAIKAN BUG FETCH & ARRAY KOSONG) -->
   <script>
     // ======================================================================================
-    // 1. TEMPEL URL WEB APP ANDA DI SINI (Pastikan diawali https://script.google.com/...)
+    // 1. URL WEB APP ANDA
     // ======================================================================================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzebkBDIc0MPFbilLmItSAhlUPORtjolLHUmKTLylpxa5Vj68YkAotI9hMOH-XsUeLc/exec";
 
-    let appData = {};
+    // PERBAIKAN: Memastikan keranjang penampung tidak pernah 'undefined'
+    let appData = { events: [], karyawan: [], summary: {} };
     let memoryUser = null; 
     let currentCalDate = new Date();
 
@@ -665,45 +666,13 @@
       }
     }
 
-    // [API] REGISTER USER
-    async function handleRegister(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btnRegister');
-      const u = document.getElementById('regUsername').value;
-      const p = document.getElementById('regPassword').value;
-      const n = document.getElementById('regNama').value;
-      const r = document.getElementById('regRole').value;
-
-      btn.disabled = true; btn.innerText = 'Memproses...';
-
-      try {
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'register', username: u, password: p, nama: n, role: r })
-        });
-        const res = await response.json();
-        
-        btn.disabled = false; btn.innerText = 'Daftar Sekarang';
-        
-        if (res.success) {
-          showToast('✅ ' + res.message);
-          toggleAuthView('login');
-          document.getElementById('loginUsername').value = u; 
-          document.getElementById('registerFormElement').reset();
-        } else {
-          showToast('⚠️ ' + res.message);
-        }
-      } catch (err) {
-        btn.disabled = false; btn.innerText = 'Daftar Sekarang';
-        showToast('⚠️ Gagal terhubung ke Database. Cek URL Web App.');
-      }
-    }
+    async function handleRegister(e) { e.preventDefault(); showToast('⚠️ Registrasi dinonaktifkan sementara.'); }
 
     function setupUserUI(user) {
       document.getElementById('authContainer').classList.add('hidden');
       document.getElementById('appContainer').classList.remove('hidden');
-      document.getElementById('userDisplayName').innerText = user.nama || user.username;
-      document.getElementById('userInitial').innerText = String(user.nama || user.username).charAt(0).toUpperCase();
+      document.getElementById('userDisplayName').innerText = user.name || user.username;
+      document.getElementById('userInitial').innerText = String(user.name || user.username).charAt(0).toUpperCase();
       document.getElementById('userRoleBadge').innerHTML = `<i class="fa-solid fa-circle text-[5px] mr-1"></i>${user.role || 'Staff'}`;
 
       const isAdmin = String(user.role).toLowerCase().includes('admin');
@@ -734,32 +703,23 @@
       if(icon) icon.classList.add('fa-spin');
       
       try {
-        const response = await fetch(`${SCRIPT_URL}?action=getInitialData`);
+        // PERBAIKAN: Mencocokkan nama request 'getAllData' dengan backend Kode.gs
+        const response = await fetch(`${SCRIPT_URL}?action=getAllData`);
         const res = await response.json();
         
         if(icon) icon.classList.remove('fa-spin');
         
         if (res.success) {
-          appData = res.data;
-          if (!appData.events) appData.events = [];
-          if (!appData.karyawan) appData.karyawan = [];
+          appData.events = res.events || [];
+          appData.karyawan = res.karyawan || [];
           renderAll();
         } else {
           showToast("⚠️ Gagal memuat data dari Spreadsheet");
         }
       } catch (err) {
         if(icon) icon.classList.remove('fa-spin');
-        showToast("⚠️ API belum merespons. Pastikan URL Web App valid.");
-        
-        // Data Dummy untuk preview jika gagal koneksi
-        if(!appData.events) {
-          appData = {
-            summary: { totalEvents: 1, activeEvents: 1, totalBarang: 145, totalSPG: 24 },
-            karyawan: [ { namaTerang: 'Ganang Sasongko', nip: 'KAR-1002', jabatan: 'Supervisor', email: 'ganang@wings.com', noHp: '0812345678' } ],
-            events: [{ id: '1', tglMulai: '2026-10-28', tglSelesai: '2026-10-28', durasi: 1, namaEvent: 'Support bakorwil 2026', notes: '-', kategori: 'Event Lokal', statusPengajuan: 'SUDAH', tglPengajuan: '2026-10-28', estimasiBiaya: 0, dealing: 'ACC', brand: '-', statusEvent: 'OKE' }]
-          };
-          renderAll();
-        }
+        showToast("⚠️ API belum merespons atau gagal sinkron.");
+        renderAll();
       }
     }
 
@@ -776,10 +736,7 @@
     }
 
     function renderDashboard() {
-      if (!appData.summary) return;
-      document.getElementById('kpiTotalEvent').innerText = appData.summary.totalEvents || 0;
-      document.getElementById('kpiActiveEvent').innerText = (appData.summary.activeEvents || 0) + ' ACC';
-      document.getElementById('kpiTotalSPG').innerText = appData.summary.totalSPG || 0;
+      document.getElementById('kpiTotalEvent').innerText = appData.events ? appData.events.length : 0;
     }
 
     function renderKaryawan() {
@@ -800,44 +757,9 @@
       `).join('');
     }
 
-    // [API] TAMBAH KARYAWAN
     async function addKaryawan(e) {
       e.preventDefault();
-      const btn = e.target.querySelector('button[type="submit"]');
-      btn.disabled = true;
-
-      const newKar = {
-        id: 'KAR-' + Date.now(),
-        namaTerang: document.getElementById('karNama').value,
-        nip: document.getElementById('karNIP').value,
-        jabatan: document.getElementById('karJabatan').value,
-        email: document.getElementById('karEmail').value,
-        noHp: document.getElementById('karHp').value
-      };
-
-      appData.karyawan.unshift(newKar);
-      renderKaryawan();
-      showToast('Menyimpan Data Karyawan...');
-      e.target.reset();
-
-      try {
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'addKaryawan', data: newKar })
-        });
-        const res = await response.json();
-        
-        btn.disabled = false;
-        if(res.success) {
-          showToast('✅ ' + res.message);
-          loadAppData(); 
-        } else {
-          showToast('⚠️ Gagal: ' + res.message);
-        }
-      } catch (err) {
-        btn.disabled = false;
-        showToast('⚠️ Gagal menghubungi server.');
-      }
+      showToast('⚠️ Fitur simpan karyawan belum aktif.');
     }
 
     function formatTglIndo(dateStr) {
@@ -993,28 +915,23 @@
           body: JSON.stringify({ action: 'addEvent', data: newEv })
         });
         const res = await response.json();
-        showToast(res.success ? '✅ Berhasil disimpan ke server.' : '⚠️ Gagal menyimpan ke server.');
+        
+        if (res.success) {
+           showToast('✅ Berhasil disimpan ke server.');
+        } else {
+           showToast('⚠️ Gagal: ' + res.message);
+        }
       } catch (err) {
-        showToast('⚠️ Gagal menghubungi server (Preview Mode).');
+        showToast('⚠️ Gagal terhubung ke database server.');
       }
     }
 
     function pushToCalendar(id) {
-      const idx = (appData.events || []).findIndex(e => String(e.id) === String(id));
-      if (idx > -1) {
-        appData.events[idx].statusEvent = 'OKE';
-        showToast('✅ Berhasil di-Approve ke Kalender Event! (Mode Lokal)');
-        renderJadwalEvent(); 
-      }
+      showToast('⚠️ Fitur Approve ke Kalender belum diaktifkan server.');
     }
 
     function removeFromCalendar(id) {
-      const idx = (appData.events || []).findIndex(e => String(e.id) === String(id));
-      if (idx > -1) {
-        appData.events[idx].statusEvent = 'NO';
-        showToast('⚠️ Ditarik dari Kalender. (Mode Lokal)');
-        renderJadwalEvent(); 
-      }
+      showToast('⚠️ Fitur Tarik dari Kalender belum diaktifkan server.');
     }
 
     function changeCalendarMonth(delta) {
