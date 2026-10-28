@@ -1278,6 +1278,63 @@
         btn.classList.add('active');
       }
     }
+    // 1. TEMPEL URL WEB APP ANDA DI ANTARA TANDA KUTIP DI BAWAH INI:
+const SCRIPT_URL = "0--kzB_32zjxO7Uw_qXfZOtgwcccjnulsGaPksIAZnw";
+
+let currentUser = null;
+let appData = { events: [], items: [], employees: [] };
+
+async function submitLogin(username, password) {
+  showLoading(true);
+  try {
+    const response = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "login", username: username, password: password })
+    });
+    const res = await response.json();
+    showLoading(false);
+
+    if (res.success) {
+      currentUser = res.user;
+      document.getElementById('authContainer').classList.add('hidden');
+      document.getElementById('appContainer').classList.remove('hidden');
+      document.getElementById('userName').innerText = currentUser.name;
+      document.getElementById('userRole').innerText = currentUser.role;
+      syncDatabase(); 
+    } else {
+      alert(res.message);
+    }
+  } catch (err) {
+    showLoading(false);
+    alert("Gagal terhubung ke database.");
+  }
+}
+
+async function syncDatabase() {
+  showLoading(true);
+  try {
+    const response = await fetch(`${SCRIPT_URL}?action=getAllData`);
+    const res = await response.json();
+    showLoading(false);
+
+    if (res.success) {
+      appData.events = res.events || [];
+      appData.items = res.items || [];
+      appData.employees = res.employees || [];
+      
+      document.getElementById('countEvent').innerText = appData.events.length;
+      document.getElementById('countItems').innerText = appData.items.length;
+      document.getElementById('countEmployees').innerText = appData.employees.length;
+    }
+  } catch (err) {
+    showLoading(false);
+  }
+}
+
+function showLoading(status) {
+  const btn = document.querySelector('button[type="submit"]');
+  if (btn) btn.disabled = status;
+}
   </script>
 </body>
 </html>
