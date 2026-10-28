@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- CSS NATIVE LENGKAP: Menjamin tampilan tetap sempurna 100% tanpa bergantung CDN -->
+  <!-- CSS NATIVE LENGKAP -->
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -575,8 +575,13 @@
     <span id="toastMsg">Notifikasi</span>
   </div>
 
-  <!-- JAVASCRIPT LOGIC -->
+  <!-- JAVASCRIPT LOGIC (PERBAIKAN FULL MENGGUNAKAN FETCH API) -->
   <script>
+    // ======================================================================================
+    // 1. TEMPEL URL WEB APP ANDA DI SINI (Pastikan diawali https://script.google.com/...)
+    // ======================================================================================
+    const SCRIPT_URL = "ISI_URL_WEB_APP_ANDA_DISINI";
+
     let appData = {};
     let memoryUser = null; 
     let currentCalDate = new Date();
@@ -599,78 +604,54 @@
       setTimeout(() => toast.classList.add('hidden'), 3500);
     }
 
-    function safeGetSession() {
-      try { return sessionStorage.getItem('currentUser'); } catch(e) { return memoryUser; }
-    }
-    function safeSetSession(val) {
-      try { sessionStorage.setItem('currentUser', val); } catch(e) { memoryUser = val; }
-    }
-    function safeRemoveSession() {
-      try { sessionStorage.removeItem('currentUser'); } catch(e) { memoryUser = null; }
-    }
+    function safeGetSession() { try { return sessionStorage.getItem('currentUser'); } catch(e) { return memoryUser; } }
+    function safeSetSession(val) { try { sessionStorage.setItem('currentUser', val); } catch(e) { memoryUser = val; } }
+    function safeRemoveSession() { try { sessionStorage.removeItem('currentUser'); } catch(e) { memoryUser = null; } }
 
     function initApp() {
       const authBox = document.getElementById('authContainer');
       const appBox = document.getElementById('appContainer');
 
-      try {
-        const savedSession = safeGetSession();
-        if (savedSession) {
-          const user = JSON.parse(savedSession);
-          setupUserUI(user);
-          loadAppData();
-        } else {
-          authBox.classList.remove('hidden');
-          appBox.classList.add('hidden');
-        }
-      } catch (err) {
+      const savedSession = safeGetSession();
+      if (savedSession) {
+        setupUserUI(JSON.parse(savedSession));
+        loadAppData();
+      } else {
         authBox.classList.remove('hidden');
         appBox.classList.add('hidden');
       }
     }
+    document.addEventListener('DOMContentLoaded', initApp);
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initApp);
-    } else {
-      initApp();
-    }
-
-    function handleLogin(e) {
+    // [API] LOGIN USER
+    async function handleLogin(e) {
       e.preventDefault();
       const btn = document.getElementById('btnLogin');
       const u = document.getElementById('loginUsername').value;
       const p = document.getElementById('loginPassword').value;
 
-      btn.disabled = true;
-      btn.innerText = 'Memverifikasi...';
+      btn.disabled = true; btn.innerText = 'Memverifikasi...';
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(res => {
-            btn.disabled = false;
-            btn.innerText = 'Masuk Sekarang';
-            if (res.success) {
-              safeSetSession(JSON.stringify(res.user));
-              setupUserUI(res.user);
-              loadAppData();
-              showToast(res.message);
-            } else {
-              showToast('⚠️ ' + res.message);
-            }
-          })
-          .withFailureHandler(err => {
-            btn.disabled = false;
-            btn.innerText = 'Masuk Sekarang';
-            showToast('⚠️ Error: ' + err.message);
-          })
-          .loginUser(u, p);
-      } else {
-        btn.disabled = false;
-        btn.innerText = 'Masuk Sekarang';
-        const dummyUser = { username: u, nama: 'Admin Wings', role: 'Super Admin' };
-        safeSetSession(JSON.stringify(dummyUser));
-        setupUserUI(dummyUser);
-        loadAppData(); 
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'login', username: u, password: p })
+        });
+        const res = await response.json();
+        
+        btn.disabled = false; btn.innerText = 'Masuk Sekarang';
+        
+        if (res.success) {
+          safeSetSession(JSON.stringify(res.user));
+          setupUserUI(res.user);
+          loadAppData();
+          showToast(res.message);
+        } else {
+          showToast('⚠️ ' + res.message);
+        }
+      } catch (err) {
+        btn.disabled = false; btn.innerText = 'Masuk Sekarang';
+        showToast('⚠️ Gagal terhubung ke Database. Cek URL Web App.');
       }
     }
 
@@ -684,7 +665,8 @@
       }
     }
 
-    function handleRegister(e) {
+    // [API] REGISTER USER
+    async function handleRegister(e) {
       e.preventDefault();
       const btn = document.getElementById('btnRegister');
       const u = document.getElementById('regUsername').value;
@@ -692,35 +674,28 @@
       const n = document.getElementById('regNama').value;
       const r = document.getElementById('regRole').value;
 
-      btn.disabled = true;
-      btn.innerText = 'Memproses...';
+      btn.disabled = true; btn.innerText = 'Memproses...';
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(res => {
-            btn.disabled = false;
-            btn.innerText = 'Daftar Sekarang';
-            if (res.success) {
-              showToast('✅ ' + res.message);
-              toggleAuthView('login');
-              document.getElementById('loginUsername').value = u; 
-              document.getElementById('registerFormElement').reset();
-            } else {
-              showToast('⚠️ ' + res.message);
-            }
-          })
-          .withFailureHandler(err => {
-            btn.disabled = false;
-            btn.innerText = 'Daftar Sekarang';
-            showToast('⚠️ Error: ' + err.message);
-          })
-          .registerUser(u, p, n, r);
-      } else {
-        btn.disabled = false;
-        btn.innerText = 'Daftar Sekarang';
-        showToast('✅ Berhasil mendaftar (Preview)! Silakan Login.');
-        toggleAuthView('login');
-        document.getElementById('loginUsername').value = u;
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'register', username: u, password: p, nama: n, role: r })
+        });
+        const res = await response.json();
+        
+        btn.disabled = false; btn.innerText = 'Daftar Sekarang';
+        
+        if (res.success) {
+          showToast('✅ ' + res.message);
+          toggleAuthView('login');
+          document.getElementById('loginUsername').value = u; 
+          document.getElementById('registerFormElement').reset();
+        } else {
+          showToast('⚠️ ' + res.message);
+        }
+      } catch (err) {
+        btn.disabled = false; btn.innerText = 'Daftar Sekarang';
+        showToast('⚠️ Gagal terhubung ke Database. Cek URL Web App.');
       }
     }
 
@@ -738,16 +713,11 @@
       document.getElementById('nav-master-barang').style.display = isAdmin ? 'flex' : 'none';
       document.getElementById('nav-master-karyawan').style.display = isAdmin ? 'flex' : 'none';
       document.getElementById('nav-master-spg').style.display = isAdmin ? 'flex' : 'none';
-
       document.getElementById('cardDaftarEvent').style.display = isAdmin ? 'block' : 'none'; 
       document.getElementById('cardBudgetSummary').style.display = isAdmin ? 'flex' : 'none'; 
       document.getElementById('cardPasaran').style.display = isAdmin ? 'block' : 'none'; 
 
-      if (!isAdmin) {
-         navigate('jadwal-event'); 
-      } else {
-         navigate('dashboard');
-      }
+      navigate(isAdmin ? 'dashboard' : 'jadwal-event');
     }
 
     function handleLogout() {
@@ -758,71 +728,51 @@
       toggleAuthView('login');
     }
 
-    function syncData() {
+    // [API] LOAD / SYNC DATA DARI SPREADSHEET
+    async function loadAppData() {
       const icon = document.getElementById('iconSync');
-      icon.classList.add('fa-spin');
-      showToast('Menarik data terbaru dari Server...');
-
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(res => {
-            icon.classList.remove('fa-spin');
-            if (res && res.success) {
-              appData = res.data;
-              if (!appData.events) appData.events = [];
-              renderAll();
-              showToast('✅ Data berhasil diperbarui!');
-            } else {
-              showToast("⚠️ Gagal sinkronisasi data.");
-            }
-          })
-          .getAppInitialData();
-      } else {
-        setTimeout(() => {
-          icon.classList.remove('fa-spin');
+      if(icon) icon.classList.add('fa-spin');
+      
+      try {
+        const response = await fetch(`${SCRIPT_URL}?action=getInitialData`);
+        const res = await response.json();
+        
+        if(icon) icon.classList.remove('fa-spin');
+        
+        if (res.success) {
+          appData = res.data;
+          if (!appData.events) appData.events = [];
+          if (!appData.karyawan) appData.karyawan = [];
           renderAll();
-          showToast('✅ Data berhasil disinkronkan (Preview)!');
-        }, 1000);
+        } else {
+          showToast("⚠️ Gagal memuat data dari Spreadsheet");
+        }
+      } catch (err) {
+        if(icon) icon.classList.remove('fa-spin');
+        showToast("⚠️ API belum merespons. Pastikan URL Web App valid.");
+        
+        // Data Dummy untuk preview jika gagal koneksi
+        if(!appData.events) {
+          appData = {
+            summary: { totalEvents: 1, activeEvents: 1, totalBarang: 145, totalSPG: 24 },
+            karyawan: [ { namaTerang: 'Ganang Sasongko', nip: 'KAR-1002', jabatan: 'Supervisor', email: 'ganang@wings.com', noHp: '0812345678' } ],
+            events: [{ id: '1', tglMulai: '2026-10-28', tglSelesai: '2026-10-28', durasi: 1, namaEvent: 'Support bakorwil 2026', notes: '-', kategori: 'Event Lokal', statusPengajuan: 'SUDAH', tglPengajuan: '2026-10-28', estimasiBiaya: 0, dealing: 'ACC', brand: '-', statusEvent: 'OKE' }]
+          };
+          renderAll();
+        }
       }
     }
 
-    function loadAppData() {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(res => {
-            if (res && res.success) {
-              appData = res.data;
-              if (!appData.events) appData.events = [];
-              if (!appData.karyawan) appData.karyawan = [];
-              renderAll();
-            } else {
-              showToast("Gagal memuat data");
-            }
-          })
-          .getAppInitialData();
-      } else {
-        appData = {
-          summary: { totalEvents: 1, activeEvents: 1, totalBarang: 145, totalSPG: 24 },
-          karyawan: [ { namaTerang: 'Ganang Sasongko', nip: 'KAR-1002', jabatan: 'Supervisor', email: 'ganang@wings.com', noHp: '0812345678' } ],
-          events: [
-            { id: '1', tglMulai: '2026-10-28', tglSelesai: '2026-10-28', durasi: 1, namaEvent: 'Support bakorwil 2026', notes: '-', kategori: 'Event Lokal', statusPengajuan: 'SUDAH', tglPengajuan: '2026-10-28', estimasiBiaya: 0, dealing: 'ACC', brand: '-', statusEvent: 'OKE' }
-          ]
-        };
-        currentCalDate = new Date(2026, 9, 1); 
-        renderAll();
-      }
+    function syncData() {
+      showToast('Menarik data terbaru dari Server...');
+      loadAppData();
     }
 
     function renderAll() {
-      try {
-        renderDashboard();
-        renderJadwalEvent();
-        renderKaryawan();
-        renderPasarTable();
-      } catch(e) {
-        console.error(e);
-        showToast("Error merender UI: " + e.message);
-      }
+      renderDashboard();
+      renderJadwalEvent();
+      renderKaryawan();
+      renderPasarTable();
     }
 
     function renderDashboard() {
@@ -850,7 +800,8 @@
       `).join('');
     }
 
-    function addKaryawan(e) {
+    // [API] TAMBAH KARYAWAN
+    async function addKaryawan(e) {
       e.preventDefault();
       const btn = e.target.querySelector('button[type="submit"]');
       btn.disabled = true;
@@ -869,20 +820,23 @@
       showToast('Menyimpan Data Karyawan...');
       e.target.reset();
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(res => {
-            showToast('✅ ' + res.message);
-            btn.disabled = false;
-            loadAppData(); 
-          })
-          .withFailureHandler(err => {
-            showToast('⚠️ Gagal: ' + err.message);
-            btn.disabled = false;
-          })
-          .saveKaryawan(newKar);
-      } else {
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'addKaryawan', data: newKar })
+        });
+        const res = await response.json();
+        
         btn.disabled = false;
+        if(res.success) {
+          showToast('✅ ' + res.message);
+          loadAppData(); 
+        } else {
+          showToast('⚠️ Gagal: ' + res.message);
+        }
+      } catch (err) {
+        btn.disabled = false;
+        showToast('⚠️ Gagal menghubungi server.');
       }
     }
 
@@ -918,22 +872,11 @@
       if (awal && akhir) {
         const d1 = new Date(awal);
         const d2 = new Date(akhir);
-
-        if (isNaN(d1) || isNaN(d2)) {
-           durasiEl.value = ''; return;
+        if (!isNaN(d1) && !isNaN(d2)) {
+          const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+          const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
+          durasiEl.value = (utc2 >= utc1) ? Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24)) + 1 : 1;
         }
-
-        const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
-        const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
-
-        if (utc2 >= utc1) {
-          const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24)) + 1; 
-          durasiEl.value = diffDays;
-        } else {
-          durasiEl.value = 1; 
-        }
-      } else {
-        durasiEl.value = ''; 
       }
     }
 
@@ -945,7 +888,6 @@
 
       const targetY = currentCalDate.getFullYear();
       const targetM = currentCalDate.getMonth();
-
       const startVal = d1.getFullYear() * 12 + d1.getMonth();
       const endVal = d2.getFullYear() * 12 + d2.getMonth();
       const targetVal = targetY * 12 + targetM;
@@ -986,16 +928,6 @@
       } else {
         html += eventsInMonth.map((ev, idx) => {
           let finalDurasi = parseInt(ev.durasi) || 1;
-          if (finalDurasi < 0 || finalDurasi > 1000) {
-            const d1 = new Date(ev.tglMulai);
-            const d2 = new Date(ev.tglSelesai);
-            if (!isNaN(d1) && !isNaN(d2)) {
-                const u1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
-                const u2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
-                finalDurasi = Math.max(1, Math.floor((u2 - u1) / (1000 * 60 * 60 * 24)) + 1);
-            } else { finalDurasi = 1; }
-          }
-
           const isLokal = String(ev.kategori).toUpperCase().includes('LOKAL');
           const isPusat = String(ev.kategori).toUpperCase().includes('PUSAT');
           const isApproved = ev.statusEvent === 'OKE';
@@ -1021,11 +953,11 @@
         }).join('');
       }
       tbody.innerHTML = html;
-
       renderCalendarGantt(); 
     }
 
-    function addEventFromTable() {
+    // [API] TAMBAH EVENT
+    async function addEventFromTable() {
       const nama = document.getElementById('inputEvNama').value;
       const awal = document.getElementById('inputEvAwal').value;
       const akhir = document.getElementById('inputEvAkhir').value;
@@ -1035,10 +967,6 @@
         return;
       }
 
-      const isLokal = document.getElementById('inputEvLokal').checked;
-      let kategori = 'Event Pusat'; 
-      if(isLokal) kategori = 'Event Lokal';
-
       const newEv = {
         id: 'EVT-' + Date.now(),
         tglMulai: awal,
@@ -1046,7 +974,7 @@
         durasi: document.getElementById('inputEvDurasi').value || 1,
         namaEvent: nama,
         notes: document.getElementById('inputEvNotes').value,
-        kategori: kategori,
+        kategori: document.getElementById('inputEvLokal').checked ? 'Event Lokal' : 'Event Pusat',
         tglPengajuan: '', 
         estimasiBiaya: 0, 
         statusPengajuan: 'BELUM', 
@@ -1057,10 +985,17 @@
 
       appData.events.unshift(newEv); 
       renderJadwalEvent();
-      showToast('Tersimpan di Daftar (Belum Masuk Kalender).');
+      showToast('Menyimpan Event...');
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run.savePengajuanEvent(newEv);
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'addEvent', data: newEv })
+        });
+        const res = await response.json();
+        showToast(res.success ? '✅ Berhasil disimpan ke server.' : '⚠️ Gagal menyimpan ke server.');
+      } catch (err) {
+        showToast('⚠️ Gagal menghubungi server (Preview Mode).');
       }
     }
 
@@ -1068,12 +1003,8 @@
       const idx = (appData.events || []).findIndex(e => String(e.id) === String(id));
       if (idx > -1) {
         appData.events[idx].statusEvent = 'OKE';
-        showToast('✅ Berhasil di-Approve ke Kalender Event!');
+        showToast('✅ Berhasil di-Approve ke Kalender Event! (Mode Lokal)');
         renderJadwalEvent(); 
-
-        if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.updateEventStatus(id, 'OKE');
-        }
       }
     }
 
@@ -1081,36 +1012,9 @@
       const idx = (appData.events || []).findIndex(e => String(e.id) === String(id));
       if (idx > -1) {
         appData.events[idx].statusEvent = 'NO';
-        showToast('⚠️ Ditarik dari Kalender.');
+        showToast('⚠️ Ditarik dari Kalender. (Mode Lokal)');
         renderJadwalEvent(); 
-
-        if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.updateEventStatus(id, 'NO');
-        }
       }
-    }
-
-    function updateKalenderTgl(id, val) {
-       const idx = appData.events.findIndex(e => String(e.id) === String(id));
-       if (idx > -1) {
-          appData.events[idx].tglPengajuan = val;
-          appData.events[idx].statusPengajuan = val ? 'SUDAH' : 'BELUM';
-          renderJadwalEvent(); 
-          if (typeof google !== 'undefined' && google.script && google.script.run) {
-             google.script.run.updateEventDetails(id, val, appData.events[idx].estimasiBiaya);
-          }
-       }
-    }
-
-    function updateKalenderBudget(id, val) {
-       const idx = appData.events.findIndex(e => String(e.id) === String(id));
-       if (idx > -1) {
-          appData.events[idx].estimasiBiaya = Number(val) || 0;
-          renderJadwalEvent(); 
-          if (typeof google !== 'undefined' && google.script && google.script.run) {
-             google.script.run.updateEventDetails(id, appData.events[idx].tglPengajuan, Number(val) || 0);
-          }
-       }
     }
 
     function changeCalendarMonth(delta) {
@@ -1131,37 +1035,26 @@
 
       document.getElementById('calendarMonthLabel').innerText = `Bulan: ${monthNames[month]} ${year}`;
 
-      let headerHTML = `
-        <tr>
+      let headerHTML = `<tr>
           <th style="width: 14%;" rowspan="2">Nama Event</th>
           <th style="width: 5%;" rowspan="2">Jenis</th>
           <th style="width: 6%;" rowspan="2">Status By</th>
           <th style="width: 9%;" rowspan="2">Tgl Pengajuan</th>
-          <th style="width: 10%;" rowspan="2">Budget</th>
-      `;
+          <th style="width: 10%;" rowspan="2">Budget</th>`;
       let subHeaderHTML = `<tr>`;
 
       for (let d = 1; d <= daysInMonth; d++) {
-        const dateObj = new Date(year, month, d);
-        const dayIdx = dateObj.getDay();
-        const isSunday = dayIdx === 0;
-
+        const isSunday = new Date(year, month, d).getDay() === 0;
         const bgClass = isSunday ? 'background:#ef4444; color:white;' : 'background:#bfdbfe; color:#1e3a8a;';
-
-        headerHTML += `<th style="${bgClass} padding:1px; font-size:7px;">${dayNames[dayIdx]}</th>`;
+        headerHTML += `<th style="${bgClass} padding:1px; font-size:7px;">${dayNames[new Date(year, month, d).getDay()]}</th>`;
         subHeaderHTML += `<th style="${bgClass} padding:1px; font-size:7px;">${d}</th>`;
       }
-      headerHTML += `</tr>`;
-      subHeaderHTML += `</tr>`;
-      ganttHeader.innerHTML = headerHTML + subHeaderHTML;
+      ganttHeader.innerHTML = headerHTML + `</tr>` + subHeaderHTML + `</tr>`;
 
-      const approvedEvents = (appData.events || [])
-        .filter(ev => ev.statusEvent === 'OKE' && isEventInCurrentMonth(ev))
-        .sort((a, b) => new Date(a.tglMulai) - new Date(b.tglMulai));
+      const approvedEvents = (appData.events || []).filter(ev => ev.statusEvent === 'OKE' && isEventInCurrentMonth(ev));
 
       let bodyHTML = '';
-      let totalBudgetLokal = 0;
-      let totalBudgetPusat = 0;
+      let totalBudgetLokal = 0; let totalBudgetPusat = 0;
 
       if(approvedEvents.length === 0) {
         bodyHTML = `<tr><td style="text-align:center; color:#94a3b8; padding:1.5rem;" colspan="${daysInMonth + 5}">Tidak ada event (Approved/OKE) di bulan ini</td></tr>`;
@@ -1169,75 +1062,38 @@
         approvedEvents.forEach(ev => {
           const biaya = Number(ev.estimasiBiaya) || 0;
           const jenisLokal = String(ev.kategori).toUpperCase().includes('LOKAL');
-          const jenisPusat = String(ev.kategori).toUpperCase().includes('PUSAT');
-
-          if(jenisLokal) totalBudgetLokal += biaya;
-          if(jenisPusat) totalBudgetPusat += biaya;
-
-          const start = new Date(ev.tglMulai);
-          const end = new Date(ev.tglSelesai);
-
-          const statusByText = ev.tglPengajuan ? 'SUDAH' : 'BELUM';
-          const statusByColor = ev.tglPengajuan ? 'color:#059669;' : 'color:#94a3b8;';
-
-          let budgetWarning = '';
-          if (ev.tglPengajuan && biaya === 0) {
-             budgetWarning = `<div style="font-size:7px; color:#ef4444; font-weight:700; margin-top:2px;">Budget wajib di input!</div>`;
-          }
+          if(jenisLokal) totalBudgetLokal += biaya; else totalBudgetPusat += biaya;
 
           let rowHTML = `<tr style="border-bottom:1px solid #e2e8f0;">
                           <td style="font-weight:700; color:#334155;">${ev.namaEvent}</td>
                           <td style="text-align:center; font-weight:700;">${jenisLokal ? 'LOKAL' : 'PUSAT'}</td>
-                          <td style="text-align:center; font-weight:700; ${statusByColor}">${statusByText}</td>
+                          <td style="text-align:center; font-weight:700; color:${ev.tglPengajuan ? '#059669' : '#94a3b8'};">${ev.tglPengajuan ? 'SUDAH' : 'BELUM'}</td>
+                          <td style="text-align:center; padding:1px;"><input type="date" style="width:100%; font-size:8px; border:1px solid #cbd5e1;" value="${ev.tglPengajuan || ''}"></td>
                           <td style="text-align:center; padding:1px;">
-                             <input type="date" style="width:100%; font-size:8px; border:1px solid #cbd5e1; border-radius:3px; padding:1px;" value="${ev.tglPengajuan || ''}" onchange="updateKalenderTgl('${ev.id}', this.value)">
-                          </td>
-                          <td style="text-align:center; padding:1px;">
-                             <div style="display:flex; align-items:center; border:1px solid #cbd5e1; border-radius:3px; padding:1px; background:#ffffff;">
-                                <span style="font-size:7px; color:#94a3b8; margin-right:2px;">Rp</span>
-                                <input type="number" style="width:100%; border:none; outline:none; text-align:right; font-size:8px; font-weight:700; font-family:monospace;" value="${biaya || ''}" onchange="updateKalenderBudget('${ev.id}', this.value)">
-                             </div>
-                             ${budgetWarning}
-                          </td>
-                        `;
+                             <div style="display:flex; align-items:center; border:1px solid #cbd5e1; background:#fff;"><span style="font-size:7px; color:#94a3b8; margin-right:2px;">Rp</span>
+                             <input type="number" style="width:100%; border:none; outline:none; text-align:right; font-size:8px; font-weight:700;" value="${biaya || ''}"></div>
+                          </td>`;
 
           for (let d = 1; d <= daysInMonth; d++) {
-            const currentCellDate = new Date(year, month, d);
-            currentCellDate.setHours(0,0,0,0);
-
-            const s = new Date(start); s.setHours(0,0,0,0);
-            const e = new Date(end); e.setHours(0,0,0,0);
-
+            const currentCellDate = new Date(year, month, d).setHours(0,0,0,0);
+            const s = new Date(ev.tglMulai).setHours(0,0,0,0);
+            const e = new Date(ev.tglSelesai).setHours(0,0,0,0);
             const isActive = currentCellDate >= s && currentCellDate <= e;
-            const isSunday = currentCellDate.getDay() === 0;
+            const isSunday = new Date(year, month, d).getDay() === 0;
 
             let cellClass = "padding:0;"; 
-            if (isActive) {
-              cellClass += " background:#34d399;"; 
-            } else if (isSunday) {
-              cellClass += " background:#fee2e2;"; 
-            }
+            if (isActive) cellClass += " background:#34d399;"; 
+            else if (isSunday) cellClass += " background:#fee2e2;"; 
 
             rowHTML += `<td style="${cellClass}"></td>`;
           }
-          rowHTML += `</tr>`;
-          bodyHTML += rowHTML;
+          bodyHTML += rowHTML + `</tr>`;
         });
       }
       ganttBody.innerHTML = bodyHTML;
 
       document.getElementById('kpiBudgetPusat').innerText = `Rp ${totalBudgetPusat.toLocaleString('id-ID')}`;
       document.getElementById('kpiBudgetLokal').innerText = `Rp ${totalBudgetLokal.toLocaleString('id-ID')}`;
-
-      const maxLokal = 10000000;
-      const warningEl = document.getElementById('kpiWarningBudget');
-      if (totalBudgetLokal > maxLokal) {
-        warningEl.innerHTML = `<span style="background:#fee2e2; color:#dc2626; padding:2px 4px; border-radius:3px; font-weight:700; margin-left:4px;"><i class="fa-solid fa-triangle-exclamation"></i> OVERBUDGET!</span>`;
-      } else if (totalBudgetLokal >= 8000000) {
-        warningEl.innerHTML = `<span style="background:#fef3c7; color:#d97706; padding:2px 4px; border-radius:3px; font-weight:700; margin-left:4px;"><i class="fa-solid fa-triangle-exclamation"></i> Mendekati Max!</span>`;
-      } else {
-        warningEl.innerHTML = ''; 
-      }
     }
 
     function renderPasarTable() {
@@ -1254,19 +1110,13 @@
 
     function navigate(panelId) {
       document.querySelectorAll('.view-panel').forEach(p => p.classList.add('hidden'));
-      document.querySelectorAll('.nav-btn').forEach(b => {
-        b.classList.remove('active');
-      });
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-      const titles = {
-        'dashboard': 'Dashboard Overview',
-        'jadwal-event': 'Jadwal & Kalender Event',
-        'laporan-harian': 'Laporan Harian Event',
-        'master-barang': 'Master Material Barang',
-        'master-karyawan': 'Daftar Karyawan',
-        'master-spg': 'Database SPG & SPB'
-      };
-      document.getElementById('pageTitle').innerText = titles[panelId] || 'Sistem ERP';
+      document.getElementById('pageTitle').innerText = {
+        'dashboard': 'Dashboard Overview', 'jadwal-event': 'Jadwal & Kalender Event',
+        'laporan-harian': 'Laporan Harian Event', 'master-barang': 'Master Material Barang',
+        'master-karyawan': 'Daftar Karyawan', 'master-spg': 'Database SPG & SPB'
+      }[panelId] || 'Sistem ERP';
 
       const targetPanel = document.getElementById('panel-' + panelId);
       if (targetPanel) {
@@ -1274,67 +1124,8 @@
         if (panelId === 'jadwal-event') renderJadwalEvent(); 
       }
       const btn = document.getElementById('nav-' + panelId);
-      if (btn) {
-        btn.classList.add('active');
-      }
+      if (btn) btn.classList.add('active');
     }
-    // 1. TEMPEL URL WEB APP ANDA DI ANTARA TANDA KUTIP DI BAWAH INI:
-const SCRIPT_URL = "0--kzB_32zjxO7Uw_qXfZOtgwcccjnulsGaPksIAZnw";
-
-let currentUser = null;
-let appData = { events: [], items: [], employees: [] };
-
-async function submitLogin(username, password) {
-  showLoading(true);
-  try {
-    const response = await fetch(SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "login", username: username, password: password })
-    });
-    const res = await response.json();
-    showLoading(false);
-
-    if (res.success) {
-      currentUser = res.user;
-      document.getElementById('authContainer').classList.add('hidden');
-      document.getElementById('appContainer').classList.remove('hidden');
-      document.getElementById('userName').innerText = currentUser.name;
-      document.getElementById('userRole').innerText = currentUser.role;
-      syncDatabase(); 
-    } else {
-      alert(res.message);
-    }
-  } catch (err) {
-    showLoading(false);
-    alert("Gagal terhubung ke database.");
-  }
-}
-
-async function syncDatabase() {
-  showLoading(true);
-  try {
-    const response = await fetch(`${SCRIPT_URL}?action=getAllData`);
-    const res = await response.json();
-    showLoading(false);
-
-    if (res.success) {
-      appData.events = res.events || [];
-      appData.items = res.items || [];
-      appData.employees = res.employees || [];
-      
-      document.getElementById('countEvent').innerText = appData.events.length;
-      document.getElementById('countItems').innerText = appData.items.length;
-      document.getElementById('countEmployees').innerText = appData.employees.length;
-    }
-  } catch (err) {
-    showLoading(false);
-  }
-}
-
-function showLoading(status) {
-  const btn = document.querySelector('button[type="submit"]');
-  if (btn) btn.disabled = status;
-}
   </script>
 </body>
 </html>
