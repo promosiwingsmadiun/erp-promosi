@@ -4,308 +4,81 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stock Opname Event & Gudang Canvas</title>
-
-  <!-- Google Fonts & FontAwesome -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- CSS NATIVE LENGKAP -->
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background-color: #f1f5f9;
-      color: #1e293b;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Utilitas Dasar */
-    .hidden { display: none !important; }
-    .flex { display: flex; }
-    .flex-col { flex-direction: column; }
-    .items-center { align-items: center; }
-    .justify-center { justify-content: center; }
-    .justify-between { justify-content: space-between; }
-    .w-full { width: 100%; }
-    .h-screen { height: 100vh; }
+    body { font-family: 'Inter', system-ui, sans-serif; background-color: #f1f5f9; color: #1e293b; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    .hidden { display: none !important; } .flex { display: flex; } .flex-col { flex-direction: column; }
+    .items-center { align-items: center; } .justify-center { justify-content: center; } .justify-between { justify-content: space-between; }
+    .w-full { width: 100%; } .h-screen { height: 100vh; }
     .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-    /* AUTH MODAL STYLING */
-    #authContainer {
-      position: fixed; inset: 0;
-      background: rgba(15, 23, 42, 0.95);
-      z-index: 99999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-    .auth-card {
-      width: 100%;
-      max-width: 420px;
-      background: #ffffff;
-      border-radius: 1rem;
-      overflow: hidden;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      border: 1px solid #334155;
-    }
-    .auth-header {
-      background: #004b87;
-      color: #ffffff;
-      padding: 1.75rem 1.5rem;
-      text-align: center;
-    }
-    .auth-body { padding: 1.5rem; }
-    .form-group { margin-bottom: 1rem; }
-    .form-label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #475569;
-      margin-bottom: 0.25rem;
-      text-transform: uppercase;
-    }
-    .form-input {
-      width: 100%;
-      padding: 0.6rem 0.75rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 0.5rem;
-      font-size: 0.85rem;
-      outline: none;
-      background-color: #f8fafc;
-      transition: all 0.2s;
-    }
-    .form-input:focus {
-      border-color: #004b87;
-      box-shadow: 0 0 0 2px rgba(0, 75, 135, 0.15);
-      background-color: #ffffff;
-    }
-    .btn-primary {
-      width: 100%;
-      background: #004b87;
-      color: white;
-      font-weight: 700;
-      font-size: 0.875rem;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      border: none;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-primary:hover { background: #003666; }
-    .btn-register {
-      background: #059669;
-    }
-    .btn-register:hover { background: #047857; }
-
-    /* LAYOUT UTAMA */
-    #appContainer {
-      display: flex;
-      width: 100%;
-      height: 100vh;
-      overflow: hidden;
-    }
-    aside {
-      width: 16rem;
-      background: #0f172a;
-      color: #cbd5e1;
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      border-right: 1px solid #1e293b;
-    }
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      background: #f8fafc;
-      overflow: hidden;
-    }
-
-    /* TOPBAR */
-    header {
-      height: 4rem;
-      background: #ffffff;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 0 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
-    }
-
-    /* BUTTONS & BADGES */
-    .nav-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      padding: 0.65rem 0.75rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      border-radius: 0.5rem;
-      color: #94a3b8;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      text-align: left;
-      margin-bottom: 0.25rem;
-      transition: all 0.15s;
-    }
-    .nav-btn:hover { background: #1e293b; color: #ffffff; }
-    .nav-btn.active { background: #4f46e5; color: #ffffff; }
-    .nav-btn i { width: 1.5rem; font-size: 0.9rem; }
-
-    .card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 0.75rem;
-      padding: 1.25rem;
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-    }
-
-    /* TABEL PRESISI */
+    #authContainer { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .auth-card { width: 100%; max-width: 420px; background: #ffffff; border-radius: 1rem; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid #334155; }
+    .auth-header { background: #004b87; color: #ffffff; padding: 1.75rem 1.5rem; text-align: center; }
+    .auth-body { padding: 1.5rem; } .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 0.25rem; text-transform: uppercase; }
+    .form-input { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.85rem; outline: none; background-color: #f8fafc; transition: all 0.2s; }
+    .form-input:focus { border-color: #004b87; box-shadow: 0 0 0 2px rgba(0, 75, 135, 0.15); background-color: #ffffff; }
+    .btn-primary { width: 100%; background: #004b87; color: white; font-weight: 700; font-size: 0.875rem; padding: 0.75rem; border-radius: 0.5rem; border: none; cursor: pointer; transition: background 0.2s; }
+    .btn-primary:hover { background: #003666; } .btn-register { background: #059669; } .btn-register:hover { background: #047857; }
+    #appContainer { display: flex; width: 100%; height: 100vh; overflow: hidden; }
+    aside { width: 16rem; background: #0f172a; color: #cbd5e1; display: flex; flex-direction: column; flex-shrink: 0; border-right: 1px solid #1e293b; }
+    main { flex: 1; display: flex; flex-direction: column; min-width: 0; background: #f8fafc; overflow: hidden; }
+    header { height: 4rem; background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .nav-btn { width: 100%; display: flex; align-items: center; padding: 0.65rem 0.75rem; font-size: 0.75rem; font-weight: 600; border-radius: 0.5rem; color: #94a3b8; background: transparent; border: none; cursor: pointer; text-align: left; margin-bottom: 0.25rem; transition: all 0.15s; }
+    .nav-btn:hover { background: #1e293b; color: #ffffff; } .nav-btn.active { background: #4f46e5; color: #ffffff; } .nav-btn i { width: 1.5rem; font-size: 0.9rem; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.25rem; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.05); }
     table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    th, td {
-      border: 1px solid #cbd5e1;
-      padding: 0.35rem 0.5rem;
-      text-align: left;
-      font-size: 0.75rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    th {
-      background-color: #4a86e8;
-      color: #ffffff;
-      font-weight: 700;
-      text-align: center;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-    }
-
-    /* NOTIFIKASI TOAST */
-    #toast {
-      position: fixed; bottom: 1.5rem; right: 1.5rem;
-      background: #1e293b; color: #ffffff;
-      padding: 0.75rem 1.25rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-      font-size: 0.85rem; font-weight: 600;
-      z-index: 999999;
-      display: flex; align-items: center; gap: 0.5rem;
-    }
+    th, td { border: 1px solid #cbd5e1; padding: 0.35rem 0.5rem; text-align: left; font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    th { background-color: #4a86e8; color: #ffffff; font-weight: 700; text-align: center; font-size: 0.7rem; text-transform: uppercase; }
+    #toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #1e293b; color: #ffffff; padding: 0.75rem 1.25rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); font-size: 0.85rem; font-weight: 600; z-index: 999999; display: flex; align-items: center; gap: 0.5rem; }
   </style>
 </head>
 <body>
-
-  <!-- ================= AUTH CONTAINER ================= -->
   <div id="authContainer">
     <div class="auth-card">
       <div class="auth-header">
         <i class="fa-solid fa-boxes-stacked text-3xl mb-2"></i>
-        <h2 class="text-xl font-black tracking-tight">Stock Opname</h2>
-        <p class="text-blue-200 text-xs mt-1">Gudang Canvas D008 Promosi Madiun</p>
+        <h2 class="text-xl font-black tracking-tight">Stock Opname</h2><p class="text-blue-200 text-xs mt-1">Gudang Canvas D008 Promosi Madiun</p>
       </div>
-      
-      <!-- Form Login -->
       <div id="loginFormContainer" class="auth-body">
         <h3 class="text-center font-bold text-slate-800 text-sm uppercase tracking-wider mb-4">Akses Masuk</h3>
         <form onsubmit="handleLogin(event)">
-          <div class="form-group">
-            <label class="form-label">Username</label>
-            <input type="text" id="loginUsername" required class="form-input" placeholder="Masukkan username">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Kata Sandi</label>
-            <input type="password" id="loginPassword" required class="form-input" placeholder="••••••••">
-          </div>
+          <div class="form-group"><label class="form-label">Username</label><input type="text" id="loginUsername" required class="form-input"></div>
+          <div class="form-group"><label class="form-label">Kata Sandi</label><input type="password" id="loginPassword" required class="form-input"></div>
           <button type="submit" id="btnLogin" class="btn-primary">Masuk Sekarang</button>
-          <div class="text-center mt-3">
-            <p class="text-xs text-slate-500">Anggota baru? <a href="javascript:void(0)" onclick="toggleAuthView('register')" class="font-bold text-blue-700 hover:underline">Daftar di sini</a></p>
-          </div>
         </form>
       </div>
-
-      <!-- Form Register -->
-      <div id="registerFormContainer" class="auth-body hidden">
-        <h3 class="text-center font-bold text-slate-800 text-sm uppercase tracking-wider mb-4">Daftar Akun Baru</h3>
-        <form id="registerFormElement" onsubmit="handleRegister(event)">
-          <div class="form-group">
-            <label class="form-label">Nama Lengkap</label>
-            <input type="text" id="regNama" required class="form-input" placeholder="Nama asli Anda">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Username (Tanpa Spasi)</label>
-            <input type="text" id="regUsername" required class="form-input" placeholder="Pilih username">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Kata Sandi</label>
-            <input type="password" id="regPassword" required minlength="4" class="form-input" placeholder="Buat kata sandi">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Posisi / Hak Akses</label>
-            <select id="regRole" required class="form-input" style="cursor: pointer; font-weight: 600;">
-              <option value="Tim Promosi">Tim Promosi (Akses Terbatas)</option>
-              <option value="SPG / SPB">SPG / SPB (Akses Terbatas)</option>
-            </select>
-            <p style="font-size: 8px; color: #94a3b8; margin-top: 4px;">*Administrator hanya dapat didaftarkan via Database Induk.</p>
-          </div>
-          <button type="submit" id="btnRegister" class="btn-primary btn-register">Daftar Sekarang</button>
-          <div class="text-center mt-3">
-            <a href="javascript:void(0)" onclick="toggleAuthView('login')" class="text-xs font-bold text-blue-700 hover:underline">Batal & Kembali ke Login</a>
-          </div>
-        </form>
-      </div>
-
     </div>
   </div>
 
-  <!-- ================= MAIN APP ================= -->
   <div id="appContainer" class="hidden">
-    
-    <!-- SIDEBAR -->
     <aside>
       <div class="p-4 border-b border-slate-800 flex items-center space-x-3 bg-slate-950">
         <div class="p-2 bg-[#004b87] rounded-lg text-white shadow"><i class="fa-solid fa-boxes-packing text-base"></i></div>
-        <div>
-          <h1 class="text-xs font-black text-white tracking-widest leading-tight">WINGS</h1>
-          <p class="text-[9px] text-blue-400 font-semibold tracking-wider">MADIUN RINGROAD</p>
-        </div>
+        <div><h1 class="text-xs font-black text-white tracking-widest leading-tight">WINGS</h1><p class="text-[9px] text-blue-400 font-semibold tracking-wider">MADIUN RINGROAD</p></div>
       </div>
-      
       <div class="p-3 bg-slate-800/80 m-3 rounded-xl border border-slate-700 flex items-center space-x-3">
         <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#004b87] to-blue-400 text-white font-bold flex items-center justify-center text-xs shadow" id="userInitial">A</div>
-        <div class="overflow-hidden">
-          <h4 id="userDisplayName" class="text-xs font-bold text-white truncate">Administrator</h4>
-          <p id="userRoleBadge" class="text-[9px] text-emerald-400 font-medium truncate"><i class="fa-solid fa-circle text-[5px] mr-1"></i>Super Admin</p>
-        </div>
+        <div class="overflow-hidden"><h4 id="userDisplayName" class="text-xs font-bold text-white truncate">Administrator</h4><p id="userRoleBadge" class="text-[9px] text-emerald-400 font-medium truncate"><i class="fa-solid fa-circle text-[5px] mr-1"></i>Super Admin</p></div>
       </div>
-      
       <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scroll">
         <p class="px-2 pt-2 pb-1 text-[9px] font-bold text-slate-500 uppercase tracking-wider">Utama</p>
         <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-btn active"><i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span></button>
         <button onclick="navigate('jadwal-event')" id="nav-jadwal-event" class="nav-btn"><i class="fa-solid fa-calendar-days text-amber-400"></i> <span>Jadwal Event</span></button>
         <button onclick="navigate('laporan-harian')" id="nav-laporan-harian" class="nav-btn"><i class="fa-solid fa-clipboard-list text-emerald-400"></i> <span>Laporan Harian</span></button>
-
         <p id="menuTitleMaster" class="px-2 pt-4 pb-1 text-[9px] font-bold text-slate-500 uppercase tracking-wider">Master Data</p>
         <button onclick="navigate('master-barang')" id="nav-master-barang" class="nav-btn"><i class="fa-solid fa-box-archive text-slate-300"></i> <span>Master Barang</span></button>
         <button onclick="navigate('master-karyawan')" id="nav-master-karyawan" class="nav-btn"><i class="fa-solid fa-id-card text-slate-300"></i> <span>Daftar Karyawan</span></button>
         <button onclick="navigate('master-spg')" id="nav-master-spg" class="nav-btn"><i class="fa-solid fa-users-viewfinder text-slate-300"></i> <span>Data SPG & SPB</span></button>
       </nav>
-      
-      <div class="p-3 border-t border-slate-800">
-        <button onclick="handleLogout()" class="w-full flex items-center justify-center space-x-2 py-2 text-xs font-bold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 rounded-lg transition"><i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Keluar Sistem</span></button>
-      </div>
+      <div class="p-3 border-t border-slate-800"><button onclick="handleLogout()" class="w-full flex items-center justify-center space-x-2 py-2 text-xs font-bold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 rounded-lg transition"><i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Keluar Sistem</span></button></div>
     </aside>
 
-    <!-- CONTENT WRAPPER -->
     <main>
       <header>
         <h2 id="pageTitle" class="text-base font-black text-slate-800 uppercase tracking-tight">Sistem ERP</h2>
@@ -316,286 +89,82 @@
 
       <div class="flex-1 overflow-y-auto p-4 custom-scroll space-y-5">
         
-        <!-- PANEL: DASHBOARD -->
         <section id="panel-dashboard" class="view-panel space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="card flex items-center justify-between">
-              <div>
-                <p class="text-[10px] font-bold text-slate-500 uppercase">Total Event</p>
-                <h3 class="text-2xl font-black text-slate-800 mt-1" id="kpiTotalEvent">0</h3>
-                <span class="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded" id="kpiActiveEvent">0 ACC</span>
-              </div>
-              <div class="w-10 h-10 bg-blue-50 text-[#004b87] rounded-lg flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-check"></i></div>
-            </div>
-            <div class="card flex items-center justify-between">
-              <div>
-                <p class="text-[10px] font-bold text-slate-500 uppercase">Master Barang</p>
-                <h3 class="text-2xl font-black text-slate-800 mt-1" id="kpiTotalBarang">0</h3>
-                <span class="text-[9px] text-slate-500 font-medium">Item Terdaftar</span>
-              </div>
-              <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-lg"><i class="fa-solid fa-box"></i></div>
-            </div>
-            <div class="card flex items-center justify-between">
-              <div>
-                <p class="text-[10px] font-bold text-slate-500 uppercase">Stok Canvas D008</p>
-                <h3 class="text-2xl font-black text-slate-800 mt-1" id="kpiTotalStock">0</h3>
-                <span class="text-[9px] text-teal-600 font-bold">Total Pcs Tersedia</span>
-              </div>
-              <div class="w-10 h-10 bg-teal-50 text-teal-600 rounded-lg flex items-center justify-center text-lg"><i class="fa-solid fa-dolly"></i></div>
-            </div>
-            <div class="card flex items-center justify-between">
-              <div>
-                <p class="text-[10px] font-bold text-slate-500 uppercase">Total Personil</p>
-                <h3 class="text-2xl font-black text-slate-800 mt-1" id="kpiTotalSPG">0</h3>
-                <span class="text-[9px] text-amber-600 font-bold">SPG / Karyawan</span>
-              </div>
-              <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-lg"><i class="fa-solid fa-users"></i></div>
-            </div>
-          </div>
-
-          <div class="card bg-gradient-to-r from-[#004b87] to-blue-600 text-white p-6 relative overflow-hidden" style="border: none;">
-            <div class="relative z-10 max-w-xl">
-              <h2 class="text-xl font-black mb-1">Selamat Datang di Sistem ERP!</h2>
-              <p class="text-blue-100 text-xs">Sistem ini memonitor mutasi barang Gudang Canvas D008, penjadwalan event promosi, dan database personil secara real-time terintegrasi Google Spreadsheet.</p>
-              <button onclick="navigate('jadwal-event')" class="mt-4 px-4 py-2 bg-white text-[#004b87] text-xs font-bold rounded-lg shadow hover:bg-slate-50 transition">Lihat Jadwal Event <i class="fa-solid fa-arrow-right ml-1"></i></button>
-            </div>
-            <i class="fa-solid fa-boxes-stacked absolute -right-3 -bottom-6 text-8xl text-white opacity-10"></i>
+            <div class="card flex items-center justify-between"><div><p class="text-[10px] font-bold text-slate-500 uppercase">Total Event</p><h3 class="text-2xl font-black text-slate-800 mt-1" id="kpiTotalEvent">0</h3></div><div class="w-10 h-10 bg-blue-50 text-[#004b87] rounded-lg flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-check"></i></div></div>
+            <div class="card flex items-center justify-between"><div><p class="text-[10px] font-bold text-slate-500 uppercase">Master Barang</p><h3 class="text-2xl font-black text-slate-800 mt-1">0</h3></div><div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-lg"><i class="fa-solid fa-box"></i></div></div>
+            <div class="card flex items-center justify-between"><div><p class="text-[10px] font-bold text-slate-500 uppercase">Stok Canvas D008</p><h3 class="text-2xl font-black text-slate-800 mt-1">0</h3></div><div class="w-10 h-10 bg-teal-50 text-teal-600 rounded-lg flex items-center justify-center text-lg"><i class="fa-solid fa-dolly"></i></div></div>
+            <div class="card flex items-center justify-between"><div><p class="text-[10px] font-bold text-slate-500 uppercase">Total Personil</p><h3 class="text-2xl font-black text-slate-800 mt-1">0</h3></div><div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-lg"><i class="fa-solid fa-users"></i></div></div>
           </div>
         </section>
 
-        <!-- PANEL: JADWAL EVENT -->
+        <!-- PANEL JADWAL EVENT -->
         <section id="panel-jadwal-event" class="view-panel hidden space-y-4">
-          
-          <!-- DAFTAR EVENT (ADMIN ONLY) -->
           <div id="cardDaftarEvent" class="card">
             <div class="flex justify-between items-center mb-3">
               <h3 class="text-xs font-bold text-slate-800 uppercase tracking-tight">Daftar Event Madiun Ringroad</h3>
               <div class="flex items-center bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">
-                <label for="monthSelector" class="text-[9px] font-bold text-slate-500 mr-2 uppercase">Bulan:</label>
+                <label class="text-[9px] font-bold text-slate-500 mr-2 uppercase">Bulan:</label>
                 <input type="month" id="monthSelector" onchange="handleMonthChange(this.value)" class="bg-transparent text-blue-700 font-black text-xs outline-none cursor-pointer">
               </div>
             </div>
             
             <div style="border: 1px solid #93c5fd; overflow-x: auto;">
               <table style="min-width: 750px;">
-                <colgroup>
-                  <col style="width: 4%;">
-                  <col style="width: 10%;">
-                  <col style="width: 10%;">
-                  <col style="width: 5%;">
-                  <col style="width: 25%;">
-                  <col style="width: 16%;">
-                  <col style="width: 5%;">
-                  <col style="width: 5%;">
-                  <col style="width: 10%;">
-                  <col style="width: 10%;">
-                </colgroup>
+                <colgroup><col style="width: 4%;"><col style="width: 10%;"><col style="width: 10%;"><col style="width: 5%;"><col style="width: 25%;"><col style="width: 16%;"><col style="width: 5%;"><col style="width: 5%;"><col style="width: 10%;"><col style="width: 10%;"></colgroup>
                 <thead>
-                  <tr>
-                    <th rowspan="2">No</th>
-                    <th colspan="2">Periode</th>
-                    <th rowspan="2">Durasi<br>(Hari)</th>
-                    <th rowspan="2">Nama Event</th>
-                    <th rowspan="2">Notes</th>
-                    <th colspan="2">Jenis</th>
-                    <th rowspan="2">Brand</th>
-                    <th rowspan="2">Aksi</th>
-                  </tr>
-                  <tr>
-                    <th>Awal</th>
-                    <th>Akhir</th>
-                    <th>Lokal</th>
-                    <th>Pusat</th>
-                  </tr>
+                  <tr><th rowspan="2">No</th><th colspan="2">Periode</th><th rowspan="2">Durasi</th><th rowspan="2">Nama Event</th><th rowspan="2">Notes</th><th colspan="2">Jenis</th><th rowspan="2">Brand</th><th rowspan="2">Aksi</th></tr>
+                  <tr><th>Awal</th><th>Akhir</th><th>Lokal</th><th>Pusat</th></tr>
                 </thead>
                 <tbody id="tableBodyDaftarEvent"></tbody>
               </table>
             </div>
           </div>
 
-          <!-- KALENDER EVENT (TIMELINE) -->
           <div class="card">
             <div class="flex justify-between items-center mb-3">
-              <div>
-                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-tight">Kalender Event (Timeline)</h3>
-                <p id="calendarMonthLabel" class="text-[10px] text-slate-500 font-bold mt-0.5 uppercase">Bulan: -</p>
-              </div>
+              <div><h3 class="text-xs font-bold text-slate-800 uppercase tracking-tight">Kalender Event (Timeline)</h3><p id="calendarMonthLabel" class="text-[10px] text-slate-500 font-bold mt-0.5 uppercase">Bulan: -</p></div>
               <div class="flex space-x-1">
                 <button onclick="changeCalendarMonth(-1)" class="p-1.5 bg-slate-100 hover:bg-slate-200 rounded text-slate-600 border border-slate-200 text-xs"><i class="fa-solid fa-chevron-left"></i></button>
                 <button onclick="changeCalendarMonth(1)" class="p-1.5 bg-slate-100 hover:bg-slate-200 rounded text-slate-600 border border-slate-200 text-xs"><i class="fa-solid fa-chevron-right"></i></button>
               </div>
             </div>
+            <div style="border: 1px solid #93c5fd; overflow-x: auto;"><table id="ganttTable" style="min-width: 900px;"><thead id="ganttHeader"></thead><tbody id="ganttBody"></tbody></table></div>
             
-            <div style="border: 1px solid #93c5fd; overflow-x: auto;">
-              <table id="ganttTable" style="min-width: 900px;">
-                <thead id="ganttHeader"></thead>
-                <tbody id="ganttBody"></tbody>
-              </table>
-            </div>
-
-            <!-- Panel Budget Summary -->
             <div id="cardBudgetSummary" class="mt-3 p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex flex-col md:flex-row justify-between items-center text-xs">
               <div class="flex items-center space-x-3 mb-2 md:mb-0">
-                <div class="flex items-center space-x-1"><div style="width:10px; height:10px; background:#34d399; border-radius:2px;"></div><span class="text-[9px] font-bold text-slate-600">Event Berlangsung</span></div>
-                <div class="flex items-center space-x-1"><div style="width:10px; height:10px; background:#ef4444; border-radius:2px;"></div><span class="text-[9px] font-bold text-slate-600">Hari Libur (Minggu)</span></div>
+                <div class="flex items-center space-x-1"><div style="width:10px; height:10px; background:#34d399; border-radius:2px;"></div><span class="text-[9px] font-bold text-slate-600">Berlangsung</span></div>
+                <div class="flex items-center space-x-1"><div style="width:10px; height:10px; background:#ef4444; border-radius:2px;"></div><span class="text-[9px] font-bold text-slate-600">Minggu</span></div>
               </div>
-              
               <div class="flex space-x-4 text-[10px]">
-                <div class="bg-white px-2.5 py-1 rounded shadow-sm border border-slate-200">
-                  <span class="font-bold text-slate-600 mr-1">Budget Pusat:</span>
-                  <span id="kpiBudgetPusat" class="font-mono font-black text-blue-700">Rp 0</span>
-                </div>
-                <div class="bg-white px-2.5 py-1 rounded shadow-sm border border-slate-200">
-                  <span class="font-bold text-slate-600 mr-1">Budget Lokal:</span>
-                  <span id="kpiBudgetLokal" class="font-mono font-black text-emerald-600">Rp 0</span>
-                  <span class="mx-1 text-slate-400">/</span>
-                  <span class="font-mono text-slate-500">Rp 10.000.000</span>
-                  <span id="kpiWarningBudget"></span>
-                </div>
+                <div class="bg-white px-2.5 py-1 rounded border border-slate-200"><span class="font-bold text-slate-600 mr-1">B. Pusat:</span><span id="kpiBudgetPusat" class="font-mono font-black text-blue-700">Rp 0</span></div>
+                <div class="bg-white px-2.5 py-1 rounded border border-slate-200"><span class="font-bold text-slate-600 mr-1">B. Lokal:</span><span id="kpiBudgetLokal" class="font-mono font-black text-emerald-600">Rp 0</span></div>
               </div>
             </div>
           </div>
-
-          <!-- JADWAL PASAR TRADISIONAL -->
-          <div id="cardPasaran" class="card w-full md:w-2/3">
-            <h3 class="text-xs font-bold text-slate-800 mb-2 uppercase">Jadwal Pasaran Pasar Tradisional</h3>
-            <div style="border: 1px solid #93c5fd;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Nama Pasar</th>
-                    <th>Wilayah</th>
-                    <th>Pasaran</th>
-                  </tr>
-                </thead>
-                <tbody id="tableBodyPasaran"></tbody>
-              </table>
-            </div>
-          </div>
         </section>
 
-        <!-- PANEL: LAPORAN HARIAN -->
-        <section id="panel-laporan-harian" class="view-panel hidden">
-          <div class="card text-center p-8">
-            <i class="fa-solid fa-person-digging text-5xl text-slate-300 mb-3"></i>
-            <h2 class="text-base font-black text-slate-700 uppercase">Modul Laporan Harian</h2>
-            <p class="text-slate-500 mt-1 text-xs">Fitur input laporan harian untuk Tim Promosi dan SPG siap dikembangkan.</p>
-          </div>
-        </section>
-
-        <!-- PANEL: MASTER BARANG -->
-        <section id="panel-master-barang" class="view-panel hidden">
-          <div class="card">
-            <h3 class="text-xs font-bold text-slate-800 mb-3 uppercase">Daftar Material Barang</h3>
-            <div style="border: 1px solid #e2e8f0; overflow-x: auto;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Mat. ID</th>
-                    <th>Nama Material</th>
-                    <th>Qty/Box</th>
-                    <th>Harga Pcs</th>
-                    <th>Harga Box</th>
-                  </tr>
-                </thead>
-                <tbody id="tableBodyBarang">
-                  <tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 1rem;">Memuat data barang...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- PANEL: DAFTAR KARYAWAN -->
-        <section id="panel-master-karyawan" class="view-panel hidden space-y-4">
-          <div class="card">
-            <h3 class="text-xs font-bold text-slate-800 mb-3 uppercase">Tambah Karyawan Baru</h3>
-            <form id="formKaryawan" onsubmit="addKaryawan(event)" class="grid grid-cols-1 md:grid-cols-5 gap-2">
-              <input type="text" id="karNama" placeholder="Nama Terang" required class="form-input text-xs">
-              <input type="text" id="karNIP" placeholder="NIP" required class="form-input text-xs">
-              <input type="text" id="karJabatan" placeholder="Jabatan" required class="form-input text-xs">
-              <input type="email" id="karEmail" placeholder="Alamat Email" required class="form-input text-xs">
-              <div class="flex space-x-1">
-                <input type="text" id="karHp" placeholder="Nomor HP" required class="form-input text-xs">
-                <button type="submit" class="btn-primary" style="width: auto; padding: 0.5rem 0.75rem;"><i class="fa-solid fa-plus"></i></button>
-              </div>
-            </form>
-          </div>
-
-          <div class="card">
-            <h3 class="text-xs font-bold text-slate-800 mb-3 uppercase">Database Karyawan</h3>
-            <div style="border: 1px solid #e2e8f0; overflow-x: auto;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Nama Terang</th>
-                    <th>NIP</th>
-                    <th>Jabatan</th>
-                    <th>Alamat Email</th>
-                    <th>Nomor HP</th>
-                  </tr>
-                </thead>
-                <tbody id="tableBodyKaryawan">
-                  <tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 1rem;">Memuat data karyawan...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- PANEL: DATA SPG -->
-        <section id="panel-master-spg" class="view-panel hidden">
-          <div class="card">
-            <h3 class="text-xs font-bold text-slate-800 mb-3 uppercase">Database Personil (SPG/SPB)</h3>
-            <div style="border: 1px solid #e2e8f0; overflow-x: auto;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Nama Lengkap</th>
-                    <th>No. HP</th>
-                    <th>Domisili</th>
-                    <th>Posisi</th>
-                  </tr>
-                </thead>
-                <tbody id="tableBodySPG">
-                  <tr><td colspan="4" style="text-align:center; color:#94a3b8; padding: 1rem;">Memuat data personil...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
+        <!-- PANEL LAINNYA -->
+        <section id="panel-laporan-harian" class="view-panel hidden"><div class="card text-center p-8"><h2 class="font-black text-slate-700 uppercase">Modul Laporan Harian</h2></div></section>
+        <section id="panel-master-barang" class="view-panel hidden"><div class="card text-center p-8"><h2 class="font-black text-slate-700 uppercase">Master Barang</h2></div></section>
+        <section id="panel-master-karyawan" class="view-panel hidden"><div class="card text-center p-8"><h2 class="font-black text-slate-700 uppercase">Master Karyawan</h2></div></section>
+        <section id="panel-master-spg" class="view-panel hidden"><div class="card text-center p-8"><h2 class="font-black text-slate-700 uppercase">Data SPG & SPB</h2></div></section>
 
       </div>
     </main>
   </div>
 
-  <!-- NOTIFIKASI TOAST -->
-  <div id="toast" class="hidden">
-    <i class="fa-solid fa-circle-info text-blue-400"></i>
-    <span id="toastMsg">Notifikasi</span>
-  </div>
+  <div id="toast" class="hidden"><i class="fa-solid fa-circle-info text-blue-400"></i><span id="toastMsg" class="ml-2">Notifikasi</span></div>
 
-  <!-- JAVASCRIPT LOGIC (PERBAIKAN BUG FETCH & ARRAY KOSONG) -->
   <script>
     // ======================================================================================
-    // 1. URL WEB APP ANDA
+    // 1. TEMPEL URL WEB APP BARU ANDA DI SINI
     // ======================================================================================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzebkBDIc0MPFbilLmItSAhlUPORtjolLHUmKTLylpxa5Vj68YkAotI9hMOH-XsUeLc/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwRturwjWUUOuMTJ0wb0waiJ7GMMwGF_-igA-ePqS0uicxozXr9qEUqGo3JoSEdL7uL/exec";
 
-    // PERBAIKAN: Memastikan keranjang penampung tidak pernah 'undefined'
     let appData = { events: [], karyawan: [], summary: {} };
     let memoryUser = null; 
     let currentCalDate = new Date();
-
-    const dataPasaranTradisional = [
-      { nama: "Pasar Besar Madiun", wilayah: "Kota Madiun", pasaran: "Legi" },
-      { nama: "Pasar Sleko", wilayah: "Kota Madiun", pasaran: "Pahing" },
-      { nama: "Pasar Kabanaran", wilayah: "Kab. Madiun", pasaran: "Pon" },
-      { nama: "Pasar Caruban", wilayah: "Kab. Madiun", pasaran: "Wage" },
-      { nama: "Pasar Pagotan", wilayah: "Kab. Madiun", pasaran: "Kliwon" },
-      { nama: "Pasar Dolopo", wilayah: "Kab. Madiun", pasaran: "Legi" },
-      { nama: "Pasar Dungus", wilayah: "Kab. Madiun", pasaran: "Pahing" }
-    ];
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
@@ -610,228 +179,94 @@
     function safeRemoveSession() { try { sessionStorage.removeItem('currentUser'); } catch(e) { memoryUser = null; } }
 
     function initApp() {
-      const authBox = document.getElementById('authContainer');
-      const appBox = document.getElementById('appContainer');
-
       const savedSession = safeGetSession();
-      if (savedSession) {
-        setupUserUI(JSON.parse(savedSession));
-        loadAppData();
-      } else {
-        authBox.classList.remove('hidden');
-        appBox.classList.add('hidden');
-      }
+      if (savedSession) { setupUserUI(JSON.parse(savedSession)); loadAppData(); } 
+      else { document.getElementById('authContainer').classList.remove('hidden'); document.getElementById('appContainer').classList.add('hidden'); }
     }
     document.addEventListener('DOMContentLoaded', initApp);
 
-    // [API] LOGIN USER
+    // LOGIN
     async function handleLogin(e) {
       e.preventDefault();
       const btn = document.getElementById('btnLogin');
       const u = document.getElementById('loginUsername').value;
       const p = document.getElementById('loginPassword').value;
-
       btn.disabled = true; btn.innerText = 'Memverifikasi...';
-
       try {
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'login', username: u, password: p })
-        });
+        const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'login', username: u, password: p }) });
         const res = await response.json();
-        
         btn.disabled = false; btn.innerText = 'Masuk Sekarang';
-        
-        if (res.success) {
-          safeSetSession(JSON.stringify(res.user));
-          setupUserUI(res.user);
-          loadAppData();
-          showToast(res.message);
-        } else {
-          showToast('⚠️ ' + res.message);
-        }
-      } catch (err) {
-        btn.disabled = false; btn.innerText = 'Masuk Sekarang';
-        showToast('⚠️ Gagal terhubung ke Database. Cek URL Web App.');
-      }
+        if (res.success) { safeSetSession(JSON.stringify(res.user)); setupUserUI(res.user); loadAppData(); showToast(res.message); } 
+        else { showToast('⚠️ ' + res.message); }
+      } catch (err) { btn.disabled = false; btn.innerText = 'Masuk Sekarang'; showToast('⚠️ Gagal terhubung ke Database.'); }
     }
-
-    function toggleAuthView(view) {
-      if (view === 'register') {
-        document.getElementById('loginFormContainer').classList.add('hidden');
-        document.getElementById('registerFormContainer').classList.remove('hidden');
-      } else {
-        document.getElementById('loginFormContainer').classList.remove('hidden');
-        document.getElementById('registerFormContainer').classList.add('hidden');
-      }
-    }
-
-    async function handleRegister(e) { e.preventDefault(); showToast('⚠️ Registrasi dinonaktifkan sementara.'); }
 
     function setupUserUI(user) {
-      document.getElementById('authContainer').classList.add('hidden');
-      document.getElementById('appContainer').classList.remove('hidden');
+      document.getElementById('authContainer').classList.add('hidden'); document.getElementById('appContainer').classList.remove('hidden');
       document.getElementById('userDisplayName').innerText = user.name || user.username;
-      document.getElementById('userInitial').innerText = String(user.name || user.username).charAt(0).toUpperCase();
       document.getElementById('userRoleBadge').innerHTML = `<i class="fa-solid fa-circle text-[5px] mr-1"></i>${user.role || 'Staff'}`;
-
-      const isAdmin = String(user.role).toLowerCase().includes('admin');
-
-      document.getElementById('nav-dashboard').style.display = isAdmin ? 'flex' : 'none';
-      document.getElementById('menuTitleMaster').style.display = isAdmin ? 'block' : 'none';
-      document.getElementById('nav-master-barang').style.display = isAdmin ? 'flex' : 'none';
-      document.getElementById('nav-master-karyawan').style.display = isAdmin ? 'flex' : 'none';
-      document.getElementById('nav-master-spg').style.display = isAdmin ? 'flex' : 'none';
-      document.getElementById('cardDaftarEvent').style.display = isAdmin ? 'block' : 'none'; 
-      document.getElementById('cardBudgetSummary').style.display = isAdmin ? 'flex' : 'none'; 
-      document.getElementById('cardPasaran').style.display = isAdmin ? 'block' : 'none'; 
-
-      navigate(isAdmin ? 'dashboard' : 'jadwal-event');
+      navigate(String(user.role).toLowerCase().includes('admin') ? 'dashboard' : 'jadwal-event');
     }
 
     function handleLogout() {
-      safeRemoveSession();
-      document.getElementById('appContainer').classList.add('hidden');
-      document.getElementById('authContainer').classList.remove('hidden');
-      document.getElementById('loginPassword').value = '';
-      toggleAuthView('login');
+      safeRemoveSession(); document.getElementById('appContainer').classList.add('hidden'); document.getElementById('authContainer').classList.remove('hidden');
     }
 
-    // [API] LOAD / SYNC DATA DARI SPREADSHEET
+    // TARIK DATA
     async function loadAppData() {
-      const icon = document.getElementById('iconSync');
-      if(icon) icon.classList.add('fa-spin');
-      
+      const icon = document.getElementById('iconSync'); if(icon) icon.classList.add('fa-spin');
       try {
-        // PERBAIKAN: Mencocokkan nama request 'getAllData' dengan backend Kode.gs
         const response = await fetch(`${SCRIPT_URL}?action=getAllData`);
         const res = await response.json();
-        
         if(icon) icon.classList.remove('fa-spin');
-        
-        if (res.success) {
-          appData.events = res.events || [];
-          appData.karyawan = res.karyawan || [];
-          renderAll();
-        } else {
-          showToast("⚠️ Gagal memuat data dari Spreadsheet");
-        }
-      } catch (err) {
-        if(icon) icon.classList.remove('fa-spin');
-        showToast("⚠️ API belum merespons atau gagal sinkron.");
-        renderAll();
-      }
+        if (res.success) { appData.events = res.events || []; renderAll(); } 
+        else { showToast("⚠️ Gagal memuat data"); }
+      } catch (err) { if(icon) icon.classList.remove('fa-spin'); showToast("⚠️ API belum merespons."); }
     }
 
-    function syncData() {
-      showToast('Menarik data terbaru dari Server...');
-      loadAppData();
-    }
-
-    function renderAll() {
-      renderDashboard();
-      renderJadwalEvent();
-      renderKaryawan();
-      renderPasarTable();
-    }
-
-    function renderDashboard() {
-      document.getElementById('kpiTotalEvent').innerText = appData.events ? appData.events.length : 0;
-    }
-
-    function renderKaryawan() {
-      const tbody = document.getElementById('tableBodyKaryawan');
-      if (!tbody) return;
-      if (!appData.karyawan || appData.karyawan.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 1rem;">Tidak ada data karyawan.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = appData.karyawan.map(k => `
-        <tr style="border-bottom: 1px solid #f1f5f9;">
-          <td style="font-weight:700;">${k.namaTerang}</td>
-          <td style="font-family:monospace; color:#64748b;">${k.nip}</td>
-          <td><span style="background:#eff6ff; color:#1d4ed8; padding:2px 6px; border-radius:4px; font-weight:700; font-size:10px;">${k.jabatan}</span></td>
-          <td style="color:#64748b;">${k.email}</td>
-          <td style="font-family:monospace; text-align:center;">${k.noHp}</td>
-        </tr>
-      `).join('');
-    }
-
-    async function addKaryawan(e) {
-      e.preventDefault();
-      showToast('⚠️ Fitur simpan karyawan belum aktif.');
-    }
+    function syncData() { showToast('Menarik data terbaru dari Server...'); loadAppData(); }
+    function renderAll() { renderDashboard(); renderJadwalEvent(); }
+    function renderDashboard() { document.getElementById('kpiTotalEvent').innerText = appData.events ? appData.events.length : 0; }
 
     function formatTglIndo(dateStr) {
       if (!dateStr || dateStr === '-') return '-';
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
+      const d = new Date(dateStr); if (isNaN(d.getTime())) return dateStr;
       const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
-      const yy = String(d.getFullYear()).slice(-2);
-      return `${d.getDate()} ${months[d.getMonth()]} '${yy}`;
+      return `${d.getDate()} ${months[d.getMonth()]} '${String(d.getFullYear()).slice(-2)}`;
     }
 
     function handleMonthChange(val) {
       if (!val) return;
-      const parts = val.split('-');
-      currentCalDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1);
+      currentCalDate = new Date(parseInt(val.split('-')[0]), parseInt(val.split('-')[1]) - 1, 1);
       renderJadwalEvent(); 
     }
-
     function toggleJenisInput(clickedType) {
-      if (clickedType === 'lokal') {
-        document.getElementById('inputEvPusat').checked = false;
-      } else if (clickedType === 'pusat') {
-        document.getElementById('inputEvLokal').checked = false;
-      }
+      if (clickedType === 'lokal') document.getElementById('inputEvPusat').checked = false;
+      else if (clickedType === 'pusat') document.getElementById('inputEvLokal').checked = false;
     }
-
     function calcDurasi() {
-      const awal = document.getElementById('inputEvAwal').value;
-      const akhir = document.getElementById('inputEvAkhir').value;
-      const durasiEl = document.getElementById('inputEvDurasi');
-
+      const awal = document.getElementById('inputEvAwal').value; const akhir = document.getElementById('inputEvAkhir').value;
       if (awal && akhir) {
-        const d1 = new Date(awal);
-        const d2 = new Date(akhir);
-        if (!isNaN(d1) && !isNaN(d2)) {
-          const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
-          const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
-          durasiEl.value = (utc2 >= utc1) ? Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24)) + 1 : 1;
-        }
+        const utc1 = Date.UTC(new Date(awal).getFullYear(), new Date(awal).getMonth(), new Date(awal).getDate());
+        const utc2 = Date.UTC(new Date(akhir).getFullYear(), new Date(akhir).getMonth(), new Date(akhir).getDate());
+        document.getElementById('inputEvDurasi').value = (utc2 >= utc1) ? Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24)) + 1 : 1;
       }
     }
-
     function isEventInCurrentMonth(ev) {
       if (!ev.tglMulai || !ev.tglSelesai) return false;
-      const d1 = new Date(ev.tglMulai);
-      const d2 = new Date(ev.tglSelesai);
+      const d1 = new Date(ev.tglMulai); const d2 = new Date(ev.tglSelesai);
       if (isNaN(d1) || isNaN(d2)) return false;
-
-      const targetY = currentCalDate.getFullYear();
-      const targetM = currentCalDate.getMonth();
-      const startVal = d1.getFullYear() * 12 + d1.getMonth();
-      const endVal = d2.getFullYear() * 12 + d2.getMonth();
-      const targetVal = targetY * 12 + targetM;
-
-      return targetVal >= startVal && targetVal <= endVal;
+      const targetVal = currentCalDate.getFullYear() * 12 + currentCalDate.getMonth();
+      return targetVal >= (d1.getFullYear() * 12 + d1.getMonth()) && targetVal <= (d2.getFullYear() * 12 + d2.getMonth());
     }
 
     function renderJadwalEvent() {
-      const tbody = document.getElementById('tableBodyDaftarEvent');
-      if (!tbody) return;
-      const allEvents = appData.events || [];
-      const eventsInMonth = allEvents.filter(ev => isEventInCurrentMonth(ev));
+      const tbody = document.getElementById('tableBodyDaftarEvent'); if (!tbody) return;
+      const eventsInMonth = (appData.events || []).filter(ev => isEventInCurrentMonth(ev));
+      const mSel = document.getElementById('monthSelector');
+      if (mSel) mSel.value = `${currentCalDate.getFullYear()}-${String(currentCalDate.getMonth() + 1).padStart(2, '0')}`;
 
-      const monthSelector = document.getElementById('monthSelector');
-      if (monthSelector) {
-        const yyyy = currentCalDate.getFullYear();
-        const mm = String(currentCalDate.getMonth() + 1).padStart(2, '0');
-        monthSelector.value = `${yyyy}-${mm}`;
-      }
-
-      let html = `
-        <tr style="background:#fffbeb;">
+      let html = `<tr style="background:#fffbeb;">
           <td style="text-align:center; color:#d97706; font-weight:700;"><i class="fa-solid fa-plus"></i></td>
           <td><input type="date" id="inputEvAwal" onchange="calcDurasi()" style="width:100%; font-size:10px; border:1px solid #cbd5e1; border-radius:4px; padding:2px;"></td>
           <td><input type="date" id="inputEvAkhir" onchange="calcDurasi()" style="width:100%; font-size:10px; border:1px solid #cbd5e1; border-radius:4px; padding:2px;"></td>
@@ -842,206 +277,139 @@
           <td style="text-align:center;"><input type="checkbox" id="inputEvPusat" onclick="toggleJenisInput('pusat')"></td>
           <td><input type="text" id="inputEvBrand" placeholder="Brand" style="width:100%; font-size:10px; border:1px solid #cbd5e1; border-radius:4px; padding:2px;"></td>
           <td style="text-align:center;"><button onclick="addEventFromTable()" class="btn-primary" style="padding:4px 8px; font-size:10px;"><i class="fa-solid fa-save"></i> Simpan</button></td>
-        </tr>
-      `;
+        </tr>`;
 
-      if (eventsInMonth.length === 0) {
-        html += `<tr><td colspan="10" style="text-align:center; color:#94a3b8; padding: 1rem;">Belum ada data event pada bulan ini.</td></tr>`;
-      } else {
+      if (eventsInMonth.length === 0) { html += `<tr><td colspan="10" style="text-align:center; color:#94a3b8; padding: 1rem;">Belum ada data event pada bulan ini.</td></tr>`; } 
+      else {
         html += eventsInMonth.map((ev, idx) => {
-          let finalDurasi = parseInt(ev.durasi) || 1;
           const isLokal = String(ev.kategori).toUpperCase().includes('LOKAL');
           const isPusat = String(ev.kategori).toUpperCase().includes('PUSAT');
           const isApproved = ev.statusEvent === 'OKE';
-
           const aksiBtnHTML = !isApproved 
             ? `<button onclick="pushToCalendar('${ev.id}')" style="background:#10b981; color:white; border:none; border-radius:4px; padding:3px 6px; font-size:9px; font-weight:700; cursor:pointer;"><i class="fa-solid fa-check"></i> Approve</button>`
             : `<button onclick="removeFromCalendar('${ev.id}')" style="background:#f1f5f9; color:#059669; border:1px solid #10b981; border-radius:4px; padding:3px 6px; font-size:9px; font-weight:700; cursor:pointer;"><i class="fa-solid fa-calendar-check"></i> Approved</button>`;
-
-          return `
-            <tr style="border-bottom: 1px solid #e2e8f0;">
+          return `<tr style="border-bottom: 1px solid #e2e8f0;">
               <td style="text-align:center; font-weight:500;">${idx + 1}</td>
-              <td style="text-align:center;">${formatTglIndo(ev.tglMulai)}</td>
-              <td style="text-align:center;">${formatTglIndo(ev.tglSelesai)}</td>
-              <td style="text-align:center; font-weight:700;">${finalDurasi}</td>
-              <td style="font-weight:700; color:#334155;">${ev.namaEvent}</td>
-              <td style="color:#64748b; font-size:9px;">${ev.notes || '-'}</td>
+              <td style="text-align:center;">${formatTglIndo(ev.tglMulai)}</td><td style="text-align:center;">${formatTglIndo(ev.tglSelesai)}</td>
+              <td style="text-align:center; font-weight:700;">${parseInt(ev.durasi) || 1}</td>
+              <td style="font-weight:700; color:#334155;">${ev.namaEvent}</td><td style="color:#64748b; font-size:9px;">${ev.notes || '-'}</td>
               <td style="text-align:center;">${isLokal ? '<i class="fa-solid fa-square-check" style="color:#2563eb;"></i>' : '<i class="fa-regular fa-square" style="color:#cbd5e1;"></i>'}</td>
               <td style="text-align:center;">${isPusat ? '<i class="fa-solid fa-square-check" style="color:#2563eb;"></i>' : '<i class="fa-regular fa-square" style="color:#cbd5e1;"></i>'}</td>
-              <td>${ev.brand || '-'}</td>
-              <td style="text-align:center;">${aksiBtnHTML}</td>
-            </tr>
-          `;
+              <td>${ev.brand || '-'}</td><td style="text-align:center;">${aksiBtnHTML}</td>
+            </tr>`;
         }).join('');
       }
-      tbody.innerHTML = html;
-      renderCalendarGantt(); 
+      tbody.innerHTML = html; renderCalendarGantt(); 
     }
 
-    // [API] TAMBAH EVENT
     async function addEventFromTable() {
-      const nama = document.getElementById('inputEvNama').value;
-      const awal = document.getElementById('inputEvAwal').value;
-      const akhir = document.getElementById('inputEvAkhir').value;
+      const nama = document.getElementById('inputEvNama').value; const awal = document.getElementById('inputEvAwal').value; const akhir = document.getElementById('inputEvAkhir').value;
+      if(!nama || !awal || !akhir) { showToast('⚠️ Nama Event, Tanggal Awal & Akhir wajib diisi!'); return; }
 
-      if(!nama || !awal || !akhir) {
-        showToast('⚠️ Nama Event, Tanggal Awal & Akhir wajib diisi!');
-        return;
-      }
-
-      const newEv = {
-        id: 'EVT-' + Date.now(),
-        tglMulai: awal,
-        tglSelesai: akhir,
-        durasi: document.getElementById('inputEvDurasi').value || 1,
-        namaEvent: nama,
-        notes: document.getElementById('inputEvNotes').value,
-        kategori: document.getElementById('inputEvLokal').checked ? 'Event Lokal' : 'Event Pusat',
-        tglPengajuan: '', 
-        estimasiBiaya: 0, 
-        statusPengajuan: 'BELUM', 
-        dealing: '-',
-        brand: document.getElementById('inputEvBrand').value,
-        statusEvent: 'NO' 
-      };
-
-      appData.events.unshift(newEv); 
-      renderJadwalEvent();
-      showToast('Menyimpan Event...');
-
+      const newEv = { id: 'EVT-' + Date.now(), tglMulai: awal, tglSelesai: akhir, durasi: document.getElementById('inputEvDurasi').value || 1, namaEvent: nama, notes: document.getElementById('inputEvNotes').value, kategori: document.getElementById('inputEvLokal').checked ? 'Event Lokal' : 'Event Pusat', tglPengajuan: '', estimasiBiaya: 0, statusPengajuan: 'BELUM', dealing: '-', brand: document.getElementById('inputEvBrand').value, statusEvent: 'NO' };
+      appData.events.unshift(newEv); renderJadwalEvent(); showToast('Menyimpan Event...');
       try {
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'addEvent', data: newEv })
-        });
+        const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addEvent', data: newEv }) });
         const res = await response.json();
-        
-        if (res.success) {
-           showToast('✅ Berhasil disimpan ke server.');
-        } else {
-           showToast('⚠️ Gagal: ' + res.message);
-        }
-      } catch (err) {
-        showToast('⚠️ Gagal terhubung ke database server.');
+        if (res.success) { showToast('✅ Berhasil disimpan ke server.'); document.getElementById('inputEvNama').value = ''; } 
+        else showToast('⚠️ Gagal: ' + res.message);
+      } catch (err) { showToast('⚠️ Gagal terhubung ke database server.'); }
+    }
+
+    // [API] APPROVE & TARIK KALENDER
+    async function pushToCalendar(id) {
+      const idx = appData.events.findIndex(e => String(e.id) === String(id));
+      if (idx > -1) {
+        appData.events[idx].statusEvent = 'OKE'; renderJadwalEvent(); showToast('Memproses Approve...');
+        try {
+          const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateEventStatus', id: id, status: 'OKE' }) });
+          const res = await response.json();
+          if (res.success) showToast('✅ Berhasil di-Approve ke Kalender!'); else showToast('⚠️ Gagal: ' + res.message);
+        } catch (err) { showToast('⚠️ Gagal menghubungi server.'); }
       }
     }
 
-    function pushToCalendar(id) {
-      showToast('⚠️ Fitur Approve ke Kalender belum diaktifkan server.');
+    async function removeFromCalendar(id) {
+      const idx = appData.events.findIndex(e => String(e.id) === String(id));
+      if (idx > -1) {
+        appData.events[idx].statusEvent = 'NO'; renderJadwalEvent(); showToast('Menarik data...');
+        try {
+          const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateEventStatus', id: id, status: 'NO' }) });
+          const res = await response.json();
+          if (res.success) showToast('⚠️ Ditarik dari Kalender.'); else showToast('⚠️ Gagal: ' + res.message);
+        } catch (err) { showToast('⚠️ Gagal menghubungi server.'); }
+      }
     }
 
-    function removeFromCalendar(id) {
-      showToast('⚠️ Fitur Tarik dari Kalender belum diaktifkan server.');
+    // [API] UPDATE BUDGET & TANGGAL
+    async function updateKalenderTgl(id, val) {
+      const idx = appData.events.findIndex(e => String(e.id) === String(id));
+      if (idx > -1) {
+        appData.events[idx].tglPengajuan = val; appData.events[idx].statusPengajuan = val ? 'SUDAH' : 'BELUM'; renderJadwalEvent(); 
+        try { await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateEventDetails', id: id, tglPengajuan: val, budget: appData.events[idx].estimasiBiaya }) }); } catch(e) {}
+      }
     }
 
-    function changeCalendarMonth(delta) {
-      currentCalDate.setMonth(currentCalDate.getMonth() + delta);
-      renderJadwalEvent();
+    async function updateKalenderBudget(id, val) {
+      const idx = appData.events.findIndex(e => String(e.id) === String(id));
+      if (idx > -1) {
+        appData.events[idx].estimasiBiaya = Number(val) || 0; renderJadwalEvent(); 
+        try { await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateEventDetails', id: id, tglPengajuan: appData.events[idx].tglPengajuan, budget: Number(val) || 0 }) }); } catch(e) {}
+      }
     }
+
+    function changeCalendarMonth(delta) { currentCalDate.setMonth(currentCalDate.getMonth() + delta); renderJadwalEvent(); }
 
     function renderCalendarGantt() {
-      const ganttHeader = document.getElementById('ganttHeader');
-      const ganttBody = document.getElementById('ganttBody');
+      const ganttHeader = document.getElementById('ganttHeader'); const ganttBody = document.getElementById('ganttBody');
       if (!ganttHeader || !ganttBody) return;
-
-      const year = currentCalDate.getFullYear();
-      const month = currentCalDate.getMonth();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+      const year = currentCalDate.getFullYear(); const month = currentCalDate.getMonth(); const daysInMonth = new Date(year, month + 1, 0).getDate();
       const dayNames = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+      document.getElementById('calendarMonthLabel').innerText = `Bulan: ${['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][month]} ${year}`;
 
-      document.getElementById('calendarMonthLabel').innerText = `Bulan: ${monthNames[month]} ${year}`;
-
-      let headerHTML = `<tr>
-          <th style="width: 14%;" rowspan="2">Nama Event</th>
-          <th style="width: 5%;" rowspan="2">Jenis</th>
-          <th style="width: 6%;" rowspan="2">Status By</th>
-          <th style="width: 9%;" rowspan="2">Tgl Pengajuan</th>
-          <th style="width: 10%;" rowspan="2">Budget</th>`;
+      let headerHTML = `<tr><th style="width: 14%;" rowspan="2">Nama Event</th><th style="width: 5%;" rowspan="2">Jenis</th><th style="width: 6%;" rowspan="2">Status By</th><th style="width: 9%;" rowspan="2">Tgl Pengajuan</th><th style="width: 10%;" rowspan="2">Budget</th>`;
       let subHeaderHTML = `<tr>`;
-
       for (let d = 1; d <= daysInMonth; d++) {
-        const isSunday = new Date(year, month, d).getDay() === 0;
-        const bgClass = isSunday ? 'background:#ef4444; color:white;' : 'background:#bfdbfe; color:#1e3a8a;';
+        const bgClass = (new Date(year, month, d).getDay() === 0) ? 'background:#ef4444; color:white;' : 'background:#bfdbfe; color:#1e3a8a;';
         headerHTML += `<th style="${bgClass} padding:1px; font-size:7px;">${dayNames[new Date(year, month, d).getDay()]}</th>`;
         subHeaderHTML += `<th style="${bgClass} padding:1px; font-size:7px;">${d}</th>`;
       }
       ganttHeader.innerHTML = headerHTML + `</tr>` + subHeaderHTML + `</tr>`;
 
       const approvedEvents = (appData.events || []).filter(ev => ev.statusEvent === 'OKE' && isEventInCurrentMonth(ev));
+      let bodyHTML = ''; let totalBudgetLokal = 0; let totalBudgetPusat = 0;
 
-      let bodyHTML = '';
-      let totalBudgetLokal = 0; let totalBudgetPusat = 0;
-
-      if(approvedEvents.length === 0) {
-        bodyHTML = `<tr><td style="text-align:center; color:#94a3b8; padding:1.5rem;" colspan="${daysInMonth + 5}">Tidak ada event (Approved/OKE) di bulan ini</td></tr>`;
-      } else {
+      if(approvedEvents.length === 0) { bodyHTML = `<tr><td style="text-align:center; color:#94a3b8; padding:1.5rem;" colspan="${daysInMonth + 5}">Tidak ada event (Approved/OKE) di bulan ini</td></tr>`; } 
+      else {
         approvedEvents.forEach(ev => {
           const biaya = Number(ev.estimasiBiaya) || 0;
           const jenisLokal = String(ev.kategori).toUpperCase().includes('LOKAL');
           if(jenisLokal) totalBudgetLokal += biaya; else totalBudgetPusat += biaya;
 
           let rowHTML = `<tr style="border-bottom:1px solid #e2e8f0;">
-                          <td style="font-weight:700; color:#334155;">${ev.namaEvent}</td>
-                          <td style="text-align:center; font-weight:700;">${jenisLokal ? 'LOKAL' : 'PUSAT'}</td>
-                          <td style="text-align:center; font-weight:700; color:${ev.tglPengajuan ? '#059669' : '#94a3b8'};">${ev.tglPengajuan ? 'SUDAH' : 'BELUM'}</td>
-                          <td style="text-align:center; padding:1px;"><input type="date" style="width:100%; font-size:8px; border:1px solid #cbd5e1;" value="${ev.tglPengajuan || ''}"></td>
-                          <td style="text-align:center; padding:1px;">
-                             <div style="display:flex; align-items:center; border:1px solid #cbd5e1; background:#fff;"><span style="font-size:7px; color:#94a3b8; margin-right:2px;">Rp</span>
-                             <input type="number" style="width:100%; border:none; outline:none; text-align:right; font-size:8px; font-weight:700;" value="${biaya || ''}"></div>
-                          </td>`;
+              <td style="font-weight:700; color:#334155;">${ev.namaEvent}</td><td style="text-align:center; font-weight:700;">${jenisLokal ? 'LOKAL' : 'PUSAT'}</td>
+              <td style="text-align:center; font-weight:700; color:${ev.tglPengajuan ? '#059669' : '#94a3b8'};">${ev.tglPengajuan ? 'SUDAH' : 'BELUM'}</td>
+              <td style="text-align:center; padding:1px;"><input type="date" onchange="updateKalenderTgl('${ev.id}', this.value)" style="width:100%; font-size:8px; border:1px solid #cbd5e1;" value="${ev.tglPengajuan || ''}"></td>
+              <td style="text-align:center; padding:1px;"><div style="display:flex; align-items:center; border:1px solid #cbd5e1; background:#fff;"><span style="font-size:7px; color:#94a3b8; margin-right:2px;">Rp</span><input type="number" onchange="updateKalenderBudget('${ev.id}', this.value)" style="width:100%; border:none; outline:none; text-align:right; font-size:8px; font-weight:700;" value="${biaya || ''}"></div></td>`;
 
           for (let d = 1; d <= daysInMonth; d++) {
-            const currentCellDate = new Date(year, month, d).setHours(0,0,0,0);
-            const s = new Date(ev.tglMulai).setHours(0,0,0,0);
-            const e = new Date(ev.tglSelesai).setHours(0,0,0,0);
-            const isActive = currentCellDate >= s && currentCellDate <= e;
-            const isSunday = new Date(year, month, d).getDay() === 0;
-
-            let cellClass = "padding:0;"; 
-            if (isActive) cellClass += " background:#34d399;"; 
-            else if (isSunday) cellClass += " background:#fee2e2;"; 
-
-            rowHTML += `<td style="${cellClass}"></td>`;
+            const isActive = new Date(year, month, d).setHours(0,0,0,0) >= new Date(ev.tglMulai).setHours(0,0,0,0) && new Date(year, month, d).setHours(0,0,0,0) <= new Date(ev.tglSelesai).setHours(0,0,0,0);
+            const bg = isActive ? "background:#34d399;" : (new Date(year, month, d).getDay() === 0 ? "background:#fee2e2;" : "");
+            rowHTML += `<td style="padding:0; ${bg}"></td>`;
           }
           bodyHTML += rowHTML + `</tr>`;
         });
       }
       ganttBody.innerHTML = bodyHTML;
-
       document.getElementById('kpiBudgetPusat').innerText = `Rp ${totalBudgetPusat.toLocaleString('id-ID')}`;
       document.getElementById('kpiBudgetLokal').innerText = `Rp ${totalBudgetLokal.toLocaleString('id-ID')}`;
     }
 
-    function renderPasarTable() {
-      const tbody = document.getElementById('tableBodyPasaran');
-      if (!tbody) return;
-      tbody.innerHTML = dataPasaranTradisional.map(p => `
-        <tr style="border-bottom:1px solid #f1f5f9;">
-          <td style="font-weight:600; color:#334155;">${p.nama}</td>
-          <td style="color:#64748b;">${p.wilayah}</td>
-          <td style="font-weight:700; color:#2563eb;">${p.pasaran}</td>
-        </tr>
-      `).join('');
-    }
-
     function navigate(panelId) {
-      document.querySelectorAll('.view-panel').forEach(p => p.classList.add('hidden'));
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-
-      document.getElementById('pageTitle').innerText = {
-        'dashboard': 'Dashboard Overview', 'jadwal-event': 'Jadwal & Kalender Event',
-        'laporan-harian': 'Laporan Harian Event', 'master-barang': 'Master Material Barang',
-        'master-karyawan': 'Daftar Karyawan', 'master-spg': 'Database SPG & SPB'
-      }[panelId] || 'Sistem ERP';
-
+      document.querySelectorAll('.view-panel').forEach(p => p.classList.add('hidden')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       const targetPanel = document.getElementById('panel-' + panelId);
-      if (targetPanel) {
-        targetPanel.classList.remove('hidden');
-        if (panelId === 'jadwal-event') renderJadwalEvent(); 
-      }
-      const btn = document.getElementById('nav-' + panelId);
-      if (btn) btn.classList.add('active');
+      if (targetPanel) { targetPanel.classList.remove('hidden'); if (panelId === 'jadwal-event') renderJadwalEvent(); }
+      const btn = document.getElementById('nav-' + panelId); if (btn) btn.classList.add('active');
     }
   </script>
 </body>
